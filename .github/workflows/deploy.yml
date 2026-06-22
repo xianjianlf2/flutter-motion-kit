@@ -1,0 +1,48 @@
+name: deploy
+
+# 内容/代码改动推送到 main 即自动重部署站点 + Worker。
+# 需要在仓库 Settings 配置：
+#   Secrets:   CLOUDFLARE_API_TOKEN（Workers + Pages + KV 编辑权限）
+#              CLOUDFLARE_ACCOUNT_ID
+#              WRANGLER_TOML（worker/wrangler.toml 的完整内容，含真实 KV id —— 这样它不必进仓库）
+#   Variables: PUBLIC_MCP_ORIGIN（你的 Worker 地址，如 https://flutter-motion-kit.xxx.workers.dev）
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  site:
+    name: deploy site (Cloudflare Pages)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npm run site:build
+        env:
+          PUBLIC_MCP_ORIGIN: ${{ vars.PUBLIC_MCP_ORIGIN }}
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site/dist --project-name=flutter-motion-kit --branch=main
+
+  worker:
+    name: deploy MCP worker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: node scripts/build-catalog.mjs && npm -w mcp run build
+      # 私有配置不在仓库里：从 secret 还原 worker/wrangler.toml
+      - run: printf '%s' "${{ secrets.WRANGLER_TOML }}" > worker/wrangler.toml
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          command: deploy
