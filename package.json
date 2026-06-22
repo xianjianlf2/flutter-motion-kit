@@ -12,6 +12,7 @@
     "mcp:dev": "npm -w mcp run dev",
     "site:dev": "npm -w site run dev",
     "site:build": "npm run catalog && npm -w site run build",
+    "site:deploy": "npm run site:build && wrangler pages deploy site/dist --project-name flutter-motion-kit",
     "worker:dev": "npm -w worker run dev",
     "worker:deploy": "npm -w worker run deploy"
   },
