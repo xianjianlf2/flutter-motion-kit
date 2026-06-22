@@ -93,14 +93,20 @@ claude mcp add flutter-motion -- node /abs/path/to/flutter-motion-kit/mcp/dist/i
 cd worker
 npm i -g wrangler && wrangler login
 
-# 建 KV（连接计数），把输出的 id 填进 wrangler.toml
+cp wrangler.toml.example wrangler.toml   # 真实配置不进仓库（已 gitignore）
+
+# 建 KV（连接计数），把输出的 id 填进本地 wrangler.toml
 wrangler kv namespace create STATS
 wrangler kv namespace create STATS --preview
 
 npm run deploy        # 自动重建 catalog 并打包部署
 ```
 
-部署后访问 `/stats` 看实时连接数，`/mcp` 是 MCP 端点，`/` 看接入提示。再把 README/site 里的 `YOUR_SUBDOMAIN` 换成你的 Worker 子域即可。
+部署后访问 `/stats` 看实时连接数，`/mcp` 是 MCP 端点，`/` 看接入提示。
+
+站点侧：`cp site/.env.example site/.env` 并把 `PUBLIC_MCP_ORIGIN` 填成你的 Worker 端点（这份 `.env` 也不进仓库）。README 徽章里的 `YOUR_SUBDOMAIN` 按需替换。
+
+> **部署配置私有化**：`worker/wrangler.toml`、`site/.env`、`.dev.vars` 均已 gitignore——你的 KV id / account / 子域不会出现在公开仓库，仓库只留 `*.example` 占位。想连账号子域都不暴露，给 Worker 绑自定义域（见 `wrangler.toml.example` 注释）。
 
 > 统计：每次 `initialize` 计一次连接（KV 近似计数，够做实时徽章）。需要精确去重时升级为 Durable Object / Analytics Engine。
 

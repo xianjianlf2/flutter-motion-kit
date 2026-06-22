@@ -1,0 +1,19 @@
+# 复制成本地的 wrangler.toml 再填真实值（wrangler.toml 已被 .gitignore，不会进仓库）。
+#   cp wrangler.toml.example wrangler.toml
+name = "flutter-motion-kit"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+# 账号相关标识只放在本地 wrangler.toml，不提交：
+# account_id = "<可选，登录后通常可省略>"
+
+# KV（连接计数）。建好后把 id 填进来：
+#   npx wrangler kv namespace create STATS
+#   npx wrangler kv namespace create STATS --preview
+[[kv_namespaces]]
+binding = "STATS"
+id = "<your-kv-id>"
+preview_id = "<your-preview-kv-id>"
+
+# 想隐藏你的 *.workers.dev 账号子域，可绑自定义域（推荐）：
+# routes = [{ pattern = "mcp.yourdomain.com", custom_domain = true }]

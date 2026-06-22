@@ -3,8 +3,8 @@ import Base from '../layouts/Base.astro';
 import catalog from '../../../catalog.json';
 
 const { entries, categories } = catalog;
-// 部署 Worker 后改成你的子域
-const MCP_ORIGIN = 'https://flutter-motion-kit.YOUR_SUBDOMAIN.workers.dev';
+// 真实 URL 放 site/.env 的 PUBLIC_MCP_ORIGIN（不进仓库），这里只有占位 fallback
+const MCP_ORIGIN = import.meta.env.PUBLIC_MCP_ORIGIN ?? 'https://flutter-motion-kit.YOUR_SUBDOMAIN.workers.dev';
 const cursorConfig = Buffer.from(JSON.stringify({ url: `${MCP_ORIGIN}/mcp` })).toString('base64');
 ---
 
@@ -69,9 +69,11 @@ const cursorConfig = Buffer.from(JSON.stringify({ url: `${MCP_ORIGIN}/mcp` })).t
       });
     });
 
-    // 实时接入人数（从 Worker /stats 拉取，失败则隐藏）
-    const origin = 'https://flutter-motion-kit.YOUR_SUBDOMAIN.workers.dev';
-    fetch(`${origin}/stats`)
+  </script>
+
+  <!-- 实时接入人数：mcpOrigin 由构建时注入（来自 site/.env），失败则静默隐藏 -->
+  <script define:vars={{ mcpOrigin: MCP_ORIGIN }}>
+    fetch(`${mcpOrigin}/stats`)
       .then((r) => r.json())
       .then((d) => {
         const el = document.getElementById('live');

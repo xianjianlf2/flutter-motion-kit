@@ -5,5 +5,10 @@ site/dist/
 .astro/
 .wrangler/
 _verify/
+
+# 部署私有配置（不进公开仓库）
+worker/wrangler.toml
+worker/.dev.vars
+site/.env
 .DS_Store
 *.log
