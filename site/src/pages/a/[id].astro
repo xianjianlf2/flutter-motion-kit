@@ -1,0 +1,78 @@
+---
+import Base from '../../layouts/Base.astro';
+import catalog from '../../../../catalog.json';
+
+export function getStaticPaths() {
+  return catalog.entries.map((e) => ({ params: { id: e.id }, props: { entry: e } }));
+}
+
+const { entry } = Astro.props;
+
+// 「复制给 AI」的现成 prompt：代码 + 坑，让 CC/Cursor 带着避坑提示落地。
+const aiPrompt = [
+  `请在我的 Flutter 项目里加入这个「${entry.title}」动画。`,
+  '',
+  '代码：',
+  '```dart',
+  entry.code.trim(),
+  '```',
+  '',
+  '务必遵守以下避坑要点：',
+  ...entry.pitfalls.map((p, i) => `${i + 1}. ${p.claim} —— ${p.fix}`),
+  '',
+  `（验证于 ${entry.verifiedOn}）`,
+].join('\n');
+---
+
+<Base title={`${entry.title} — Flutter Motion Kit`}>
+  <p><a href="/">← 返回</a></p>
+  <h2 style="margin-bottom:4px">{entry.title}</h2>
+  <p class="verified">分类 {entry.category} · 难度 {entry.difficulty}/5 · 验证于 {entry.verifiedOn}</p>
+  <p style="color:var(--muted)">{entry.summary}</p>
+
+  {entry.dartpadUrl ? (
+    <iframe class="dartpad" src={entry.dartpadUrl} title="DartPad preview" loading="lazy"></iframe>
+  ) : (
+    <p style="color:var(--warn)">⏳ 在线预览未就绪：运行 <code>node scripts/sync-gists.mjs</code> 生成 gist 后即可内嵌。</p>
+  )}
+
+  <div class="btnrow">
+    <button class="act primary" id="copy-ai">📋 复制给 AI（代码 + 避坑）</button>
+    <button class="act" id="copy-code">复制代码</button>
+  </div>
+
+  <h3>代码</h3>
+  <pre><code>{entry.code.trim()}</code></pre>
+
+  <h3>⚠️ 坑（{entry.pitfalls.length}）</h3>
+  {entry.pitfalls.map((p) => (
+    <div class="pitfall">
+      <div>{p.claim}</div>
+      <div class="fix">✅ {p.fix}</div>
+      <div class="src">
+        <span class="conf">{p.confidence}</span>
+        {p.source?.startsWith('http') ? <> · <a href={p.source} target="_blank" rel="noopener">出处</a></> : null}
+        {p.provenBy ? <> · 测试佐证：<code>{p.provenBy}</code></> : null}
+      </div>
+    </div>
+  ))}
+
+  {entry.docs?.length ? (
+    <>
+      <h3>官方文档</h3>
+      <ul>{entry.docs.map((d) => <li><a href={d} target="_blank" rel="noopener">{d}</a></li>)}</ul>
+    </>
+  ) : null}
+
+  <script type="application/json" id="payload" set:html={JSON.stringify({ code: entry.code, prompt: aiPrompt })} />
+  <script>
+    const data = JSON.parse(document.getElementById('payload').textContent);
+    const flash = (btn, txt) => { const o = btn.textContent; btn.textContent = txt; setTimeout(() => (btn.textContent = o), 1400); };
+    document.getElementById('copy-code').addEventListener('click', (e) => {
+      navigator.clipboard.writeText(data.code).then(() => flash(e.target, '✓ 已复制代码'));
+    });
+    document.getElementById('copy-ai').addEventListener('click', (e) => {
+      navigator.clipboard.writeText(data.prompt).then(() => flash(e.target, '✓ 已复制（粘进 Claude Code 即可）'));
+    });
+  </script>
+</Base>

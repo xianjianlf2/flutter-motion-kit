@@ -1,0 +1,8 @@
+node_modules/
+dist/
+catalog.json
+site/dist/
+.astro/
+_verify/
+.DS_Store
+*.log

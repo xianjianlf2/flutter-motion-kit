@@ -1,0 +1,41 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 2 1 * *' # 每月 1 号重验，及时发现 Flutter 新版的 deprecation
+
+jobs:
+  catalog:
+    name: schema + catalog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: BUILD_TIME="$(date -u +%FT%TZ)" node scripts/build-catalog.mjs
+
+  flutter:
+    name: analyze · format · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable }
+      - name: Verify every snippet compiles & is idiomatic
+        run: |
+          set -e
+          flutter create --platforms=web _verify >/dev/null
+          cp very_good_analysis.yaml _verify/analysis_options.yaml 2>/dev/null || true
+          fail=0
+          for dart in content/animations/*/main.dart; do
+            echo "::group::$dart"
+            cp "$dart" _verify/lib/main.dart
+            dart format --output=none --set-exit-if-changed "$dart" || { echo "format: $dart"; fail=1; }
+            (cd _verify && flutter analyze lib/main.dart) || { echo "analyze: $dart"; fail=1; }
+            (cd _verify && flutter build web --no-pub >/dev/null) || { echo "build: $dart"; fail=1; }
+            echo "::endgroup::"
+          done
+          exit $fail

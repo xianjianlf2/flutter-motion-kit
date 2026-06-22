@@ -1,0 +1,21 @@
+# 严格 lint 基线（CI 会把它拷成被测工程的 analysis_options.yaml）。
+# 本地装 Flutter 后可直接用：flutter pub add --dev very_good_analysis
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-raw-types: true
+  errors:
+    # 动画代码的高频隐患，提升为错误级，跑不过 CI 不允许收录
+    cancel_subscriptions: error
+    close_sinks: error
+    unawaited_futures: error
+
+linter:
+  rules:
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - use_key_in_widget_constructors
+    - avoid_unnecessary_containers
+    - sized_box_for_whitespace

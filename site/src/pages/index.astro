@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+import catalog from '../../../catalog.json';
+
+const { entries, categories } = catalog;
+---
+
+<Base title="Flutter Motion Kit — 可预览的 Flutter 动画集合">
+  <p style="color:var(--muted);max-width:680px">
+    每个动画都能在线预览（DartPad 真跑）、给出可直接使用的代码，并标注
+    <strong>对应的坑（含出处与可信度）</strong>。在 Claude Code 里可通过 MCP 一键检索复用。
+  </p>
+
+  <div class="filters" id="filters">
+    <span class="chip" data-cat="all" aria-pressed="true">全部</span>
+    {categories.map((c) => <span class="chip" data-cat={c} aria-pressed="false">{c}</span>)}
+  </div>
+
+  <div class="grid" id="grid">
+    {entries.map((e) => (
+      <a class="card" href={`/a/${e.id}`} data-cat={e.category}>
+        <h3>{e.title}</h3>
+        <p>{e.summary}</p>
+        <div class="badges">
+          <span class="badge">{e.category}</span>
+          <span class="badge">难度 {e.difficulty}/5</span>
+          <span class="badge">⚠ {e.pitfalls.length} 个坑</span>
+        </div>
+      </a>
+    ))}
+  </div>
+
+  <script>
+    const chips = document.querySelectorAll('#filters .chip');
+    const cards = document.querySelectorAll('#grid .card');
+    chips.forEach((chip) =>
+      chip.addEventListener('click', () => {
+        const cat = chip.getAttribute('data-cat');
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+        cards.forEach((card) => {
+          const show = cat === 'all' || card.getAttribute('data-cat') === cat;
+          (card as HTMLElement).style.display = show ? '' : 'none';
+        });
+      }),
+    );
+  </script>
+</Base>

@@ -1,0 +1,32 @@
+id: staggered-list-entrance
+title: 列表项交错入场
+category: staggered
+difficulty: 3
+tags: [list, staggered, entrance, AnimatedBuilder, controller]
+summary: >
+  列表项依次「淡入 + 上滑」入场。用单个 AnimationController + Interval 错峰驱动，
+  比给每个 item 各开一个 controller 更省资源。
+verifiedOn: "Flutter 3.32 / 2026-06"
+gistId: ""
+docs:
+  - https://docs.flutter.dev/ui/animations/staggered-animations
+  - https://api.flutter.dev/flutter/widgets/AnimatedBuilder-class.html
+  - https://api.flutter.dev/flutter/animation/Interval-class.html
+pitfalls:
+  - claim: AnimatedBuilder 的 builder 闭包里直接 new 子树，会导致每帧重建整棵子树。
+    fix: 把不随动画变化的内容作为 child 传入，builder 里复用该 child（只动 Transform/Opacity）。
+    source: https://api.flutter.dev/flutter/widgets/AnimatedBuilder-class.html
+    confidence: official-docs
+  - claim: 漏 dispose() 会泄漏 AnimationController 持有的 Ticker。
+    fix: 在 State.dispose() 里 _controller.dispose()；单控制器用 SingleTickerProviderStateMixin。
+    source: https://api.flutter.dev/flutter/widgets/SingleTickerProviderStateMixin-mixin.html
+    confidence: official-docs
+    provenBy: test/leak_test.dart      # 有自动化测试证明
+  - claim: Interval 的 begin/end 必须落在 [0,1]，越界不报错但行为错误。
+    fix: 错峰公式 begin = i * gap，end = begin + slice，确保 end <= 1。
+    source: https://api.flutter.dev/flutter/animation/Interval-class.html
+    confidence: official-docs
+  - claim: 在 controller 的 listener 里 setState 会触发整个 widget 全量 rebuild。
+    fix: 用 AnimatedBuilder/FadeTransition 把重建范围收敛到动画子树。
+    source: https://docs.flutter.dev/ui/animations/tutorial
+    confidence: official-docs

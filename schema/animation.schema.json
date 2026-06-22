@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://flutter-motion-kit/schema/animation.schema.json",
+  "title": "Flutter Motion Kit — animation entry",
+  "type": "object",
+  "required": ["id", "title", "category", "difficulty", "summary", "verifiedOn", "pitfalls"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "title": { "type": "string", "minLength": 2 },
+    "category": {
+      "type": "string",
+      "enum": ["implicit", "explicit", "hero", "staggered", "physics", "custom-painter", "rive-lottie"]
+    },
+    "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "summary": { "type": "string", "minLength": 10 },
+    "verifiedOn": { "type": "string", "description": "e.g. 'Flutter 3.32 / 2026-06'" },
+    "gistId": { "type": "string", "description": "filled by scripts/sync-gists.mjs" },
+    "docs": { "type": "array", "items": { "type": "string", "format": "uri" } },
+    "pitfalls": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["claim", "fix", "source", "confidence"],
+        "additionalProperties": false,
+        "properties": {
+          "claim": { "type": "string" },
+          "fix": { "type": "string" },
+          "source": { "type": "string", "description": "URL or a confidence keyword" },
+          "confidence": {
+            "type": "string",
+            "enum": ["official-docs", "github-issue", "measured", "community-consensus", "author-experience"]
+          },
+          "provenBy": { "type": "string", "description": "path to a test that proves this pitfall" }
+        }
+      }
+    }
+  }
+}

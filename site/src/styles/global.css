@@ -1,0 +1,44 @@
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --accent: #58a6ff;
+  --good: #3fb950;
+  --warn: #d29922;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 32px 20px 80px; }
+header.site { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+header.site h1 { margin: 0; font-size: 22px; }
+header.site .tag { color: var(--muted); font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 24px; }
+.card { display: block; padding: 18px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; transition: border-color .15s; }
+.card:hover { border-color: var(--accent); text-decoration: none; }
+.card h3 { margin: 0 0 6px; color: var(--text); font-size: 16px; }
+.card p { margin: 0; color: var(--muted); font-size: 13px; }
+.badges { margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #21262d; color: var(--muted); border: 1px solid var(--border); }
+.filters { margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { cursor: pointer; font-size: 13px; padding: 4px 12px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); color: var(--muted); }
+.chip[aria-pressed='true'] { color: var(--text); border-color: var(--accent); }
+iframe.dartpad { width: 100%; height: 520px; border: 1px solid var(--border); border-radius: 12px; background: #1e1e1e; }
+pre { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; overflow: auto; font-size: 13px; }
+.pitfall { padding: 14px 16px; border: 1px solid var(--border); border-left: 3px solid var(--warn); border-radius: 8px; margin: 10px 0; background: var(--panel); }
+.pitfall .fix { color: var(--good); margin-top: 6px; }
+.pitfall .src { color: var(--muted); font-size: 12px; margin-top: 6px; }
+.conf { font-size: 11px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); }
+.btnrow { display: flex; gap: 10px; margin: 16px 0; flex-wrap: wrap; }
+button.act { cursor: pointer; font-size: 14px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel); color: var(--text); }
+button.act:hover { border-color: var(--accent); }
+button.act.primary { background: var(--accent); color: #06121f; border-color: var(--accent); font-weight: 600; }
+.verified { color: var(--muted); font-size: 12px; }
