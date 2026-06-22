@@ -2,9 +2,11 @@
 
 > 可**在线预览**的 Flutter 动画实现集合，每条都标注**对应的坑（含出处与可信度）**，并能让 **Claude Code / Cursor 一键复用**（MCP）。
 
-[![developers connected](https://img.shields.io/badge/dynamic/json?url=https://flutter-motion-kit.YOUR_SUBDOMAIN.workers.dev/stats&query=$.connections&label=devs%20connected&color=brightgreen)](https://flutter-motion-kit.pages.dev)
-[![animations](https://img.shields.io/badge/dynamic/json?url=https://flutter-motion-kit.YOUR_SUBDOMAIN.workers.dev/stats&query=$.animations&label=animations&color=blue)](https://flutter-motion-kit.pages.dev)
+[![developers connected](https://img.shields.io/badge/dynamic/json?url=https://mcp.markxian.cn/stats&query=$.connections&label=devs%20connected&color=brightgreen)](https://motion.markxian.cn)
+[![animations](https://img.shields.io/badge/dynamic/json?url=https://mcp.markxian.cn/stats&query=$.animations&label=animations&color=blue)](https://motion.markxian.cn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+**🌐 在线预览：[motion.markxian.cn](https://motion.markxian.cn)**
 
 ## 一键接入（远程 MCP · 零安装）
 
@@ -12,15 +14,14 @@
 
 **Claude Code**
 ```bash
-claude mcp add --transport http flutter-motion https://flutter-motion-kit.YOUR_SUBDOMAIN.workers.dev/mcp
+claude mcp add --transport http flutter-motion https://mcp.markxian.cn/mcp
 ```
 
 **Cursor / VS Code**：点按钮一键导入
 
-[![Add to Cursor](https://img.shields.io/badge/Add%20to-Cursor-000?logo=cursor)](cursor://anysphere.cursor-deeplink/mcp/install?name=flutter-motion&config=eyJ1cmwiOiJodHRwczovL2ZsdXR0ZXItbW90aW9uLWtpdC5ZT1VSX1NVQkRPTUFJTi53b3JrZXJzLmRldi9tY3AifQ==)
-[![Add to VS Code](https://img.shields.io/badge/Add%20to-VS%20Code-007ACC?logo=visualstudiocode)](https://insiders.vscode.dev/redirect/mcp/install?name=flutter-motion&config=%7B%22url%22%3A%22https%3A%2F%2Fflutter-motion-kit.YOUR_SUBDOMAIN.workers.dev%2Fmcp%22%7D)
+[![Add to Cursor](https://img.shields.io/badge/Add%20to-Cursor-000?logo=cursor)](cursor://anysphere.cursor-deeplink/mcp/install?name=flutter-motion&config=eyJ1cmwiOiJodHRwczovL21jcC5tYXJreGlhbi5jbi9tY3AifQ==)
+[![Add to VS Code](https://img.shields.io/badge/Add%20to-VS%20Code-007ACC?logo=visualstudiocode)](https://insiders.vscode.dev/redirect/mcp/install?name=flutter-motion&config=%7B%22url%22%3A%22https%3A%2F%2Fmcp.markxian.cn%2Fmcp%22%7D)
 
-> 部署后把 `YOUR_SUBDOMAIN` 换成你的 Worker 子域；Cursor 按钮的 `config` 是 `{"url":"<你的/mcp>"}` 的 base64。
 > 离线/本地版（npx、无需托管）见下方 [本地开发版](#接入-claude-code一键复用)。
 
 一份结构化数据源，三个出口：
@@ -104,7 +105,7 @@ npm run deploy        # 自动重建 catalog 并打包部署
 
 部署后访问 `/stats` 看实时连接数，`/mcp` 是 MCP 端点，`/` 看接入提示。
 
-站点侧：`cp site/.env.example site/.env` 并把 `PUBLIC_MCP_ORIGIN` 填成你的 Worker 端点（这份 `.env` 也不进仓库）。README 徽章里的 `YOUR_SUBDOMAIN` 按需替换。
+站点侧：`cp site/.env.example site/.env` 并把 `PUBLIC_MCP_ORIGIN` 填成你的 Worker 端点（这份 `.env` 也不进仓库）。
 
 > **部署配置私有化**：`worker/wrangler.toml`、`site/.env`、`.dev.vars` 均已 gitignore——你的 KV id / account / 子域不会出现在公开仓库，仓库只留 `*.example` 占位。想连账号子域都不暴露，给 Worker 绑自定义域（见 `wrangler.toml.example` 注释）。
 
