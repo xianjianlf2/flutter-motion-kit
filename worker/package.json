@@ -1,0 +1,16 @@
+{
+  "name": "@flutter-motion-kit/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prebuild": "node ../scripts/build-catalog.mjs && npm --prefix ../mcp run build",
+    "predev": "npm run prebuild",
+    "dev": "wrangler dev",
+    "deploy": "npm run prebuild && wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240909.0",
+    "wrangler": "^3.80.0"
+  }
+}

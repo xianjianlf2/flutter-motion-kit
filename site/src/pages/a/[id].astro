@@ -22,9 +22,26 @@ const aiPrompt = [
   '',
   `（验证于 ${entry.verifiedOn}）`,
 ].join('\n');
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: `${entry.title} — Flutter 动画实现与避坑`,
+  description: entry.summary.trim(),
+  about: 'Flutter animation',
+  keywords: ['Flutter', 'animation', entry.category, ...(entry.tags ?? [])].join(', '),
+  proficiencyLevel: entry.difficulty <= 2 ? 'Beginner' : 'Expert',
+  url: new URL(`/a/${entry.id}`, Astro.site).href,
+};
 ---
 
-<Base title={`${entry.title} — Flutter Motion Kit`}>
+<Base
+  title={`${entry.title} — Flutter Motion Kit`}
+  description={`${entry.summary.trim()} 含 ${entry.pitfalls.length} 个避坑要点，可在线预览并一键复用。`}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
   <p><a href="/">← 返回</a></p>
   <h2 style="margin-bottom:4px">{entry.title}</h2>
   <p class="verified">分类 {entry.category} · 难度 {entry.difficulty}/5 · 验证于 {entry.verifiedOn}</p>

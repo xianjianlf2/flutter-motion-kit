@@ -1,6 +1,11 @@
 ---
 import '../styles/global.css';
-const { title = 'Flutter Motion Kit' } = Astro.props;
+const {
+  title = 'Flutter Motion Kit',
+  description = '可预览的 Flutter 动画实现集合 + 对应的坑，支持 Claude Code / Cursor 一键复用（MCP）。',
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/og.png', Astro.site).href;
 ---
 
 <!doctype html>
@@ -9,7 +14,26 @@ const { title = 'Flutter Motion Kit' } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
-    <meta name="description" content="可预览的 Flutter 动画实现集合 + 对应的坑，支持 Claude Code 一键复用（MCP）。" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- 让 AI 搜索/agent 发现 MCP 与目录 -->
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
+    <link rel="alternate" type="application/json" href="/api/animations.json" title="catalog" />
+    <slot name="head" />
   </head>
   <body>
     <div class="wrap">

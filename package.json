@@ -3,15 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "可预览的 Flutter 动画实现集合 + 对应的坑，支持 Claude Code 一键复用（MCP）。",
-  "workspaces": ["mcp", "site"],
+  "description": "可预览的 Flutter 动画实现集合 + 对应的坑，支持 Claude Code / Cursor 一键复用（远程 MCP）。",
+  "workspaces": ["mcp", "site", "worker"],
   "scripts": {
     "catalog": "node scripts/build-catalog.mjs",
     "sync-gists": "node scripts/sync-gists.mjs",
     "mcp:build": "npm -w mcp run build",
     "mcp:dev": "npm -w mcp run dev",
     "site:dev": "npm -w site run dev",
-    "site:build": "npm run catalog && npm -w site run build"
+    "site:build": "npm run catalog && npm -w site run build",
+    "worker:dev": "npm -w worker run dev",
+    "worker:deploy": "npm -w worker run deploy"
   },
   "dependencies": {
     "ajv": "^8.17.0",

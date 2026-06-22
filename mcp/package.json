@@ -1,15 +1,21 @@
 {
-  "name": "@flutter-motion-kit/mcp",
+  "name": "flutter-motion-mcp",
   "version": "0.1.0",
-  "private": true,
+  "description": "MCP server exposing verified Flutter animation implementations + pitfalls to AI coding assistants (Claude Code, Cursor).",
+  "keywords": ["mcp", "modelcontextprotocol", "flutter", "animation", "claude", "cursor", "ai"],
+  "license": "MIT",
+  "author": "MarkXian <mark-xian@foxmail.com>",
+  "homepage": "https://github.com/xianjianlf2/flutter-motion-kit",
+  "repository": { "type": "git", "url": "https://github.com/xianjianlf2/flutter-motion-kit.git", "directory": "mcp" },
   "type": "module",
-  "bin": {
-    "flutter-motion-mcp": "dist/index.js"
-  },
+  "bin": { "flutter-motion-mcp": "dist/index.js" },
+  "files": ["dist", "catalog.json", "README.md"],
   "scripts": {
+    "prebuild": "node ../scripts/build-catalog.mjs && cp ../catalog.json ./catalog.json",
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",

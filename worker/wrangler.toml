@@ -1,0 +1,13 @@
+name = "flutter-motion-kit"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+# 部署前创建 KV 并把 id 填到这里：
+#   npx wrangler kv namespace create STATS
+#   npx wrangler kv namespace create STATS --preview
+[[kv_namespaces]]
+binding = "STATS"
+id = "REPLACE_WITH_KV_ID"
+preview_id = "REPLACE_WITH_PREVIEW_KV_ID"
+
+# catalog.json 在部署时由 build 步骤生成（见 package.json deploy 脚本），随 esbuild 打包进 Worker。

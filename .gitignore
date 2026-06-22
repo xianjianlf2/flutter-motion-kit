@@ -3,6 +3,7 @@ dist/
 catalog.json
 site/dist/
 .astro/
+.wrangler/
 _verify/
 .DS_Store
 *.log
