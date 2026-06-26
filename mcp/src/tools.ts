@@ -30,7 +30,7 @@ export const TOOL_DEFS = [
   },
   {
     name: 'get_animation',
-    description: '按 id 返回完整内容：可直接使用的代码 + 必须注意的坑（含出处与可信度）+ 验证日期。',
+    description: '按 id 返回完整内容：可直接使用的代码(code) + 错误写法反例(badCode，用于对照) + 必须注意的坑（含出处与可信度）+ 验证日期。',
     inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
   },
   {
@@ -45,15 +45,21 @@ export const TOOL_DEFS = [
   },
 ] as const;
 
-const score = (e: Entry, q: string) => {
-  const t = (q ?? '').toLowerCase();
-  if (!t) return 1;
+// 按词打分：把 query 拆成词逐个累加，"列表 入场" 这种多词查询也能命中
+// （旧版把整串当子串匹配，空格一断就召回为 0）。
+const scoreTerm = (e: Entry, t: string) => {
   let s = 0;
   if (e.id.includes(t) || e.title.toLowerCase().includes(t)) s += 5;
   if (e.summary.toLowerCase().includes(t)) s += 2;
   if ((e.tags ?? []).some((tag) => tag.toLowerCase().includes(t))) s += 3;
   if (e.category.includes(t)) s += 2;
   return s;
+};
+
+const score = (e: Entry, q: string) => {
+  const terms = (q ?? '').toLowerCase().split(/[\s,，、]+/).filter(Boolean);
+  if (!terms.length) return 1;
+  return terms.reduce((sum, t) => sum + scoreTerm(e, t), 0);
 };
 
 export function searchAnimations(
@@ -77,8 +83,9 @@ export function getAnimation(catalog: Catalog, id: string) {
   if (!e) return null;
   return {
     id: e.id, title: e.title, category: e.category, verifiedOn: e.verifiedOn,
-    code: e.code, pitfalls: e.pitfalls, docs: e.docs, dartpadUrl: e.dartpadUrl,
-    usageNote: '采用此代码时，请遵守 pitfalls 中的 fix；confidence 标明了每条依据的强度。',
+    code: e.code, badCode: e.badCode ?? null, pitfalls: e.pitfalls, docs: e.docs, dartpadUrl: e.dartpadUrl,
+    usageNote: '采用 code 中的正确实现，并遵守 pitfalls 中的 fix；confidence 标明每条依据的强度。'
+      + (e.badCode ? ' badCode 是「错误写法」反例——用于对照，切勿照搬。' : ''),
   };
 }
 

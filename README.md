@@ -31,7 +31,7 @@ content/animations/<id>/{meta.yaml, main.dart, bad.dart}   ← 唯一真相源
         │  scripts/build-catalog.mjs（schema 校验 + 聚合）
         ▼
    catalog.json
-   ├──▶ 站点(Astro)：DartPad 在线预览 + 代码 + 坑 + [复制给 AI] 按钮
+   ├──▶ 站点(Astro)：真实运行的 Flutter web 预览（自托管）+ 代码 + 坑 + [复制给 AI] 按钮
    └──▶ MCP server：search / get / list_pitfalls，供 AI 编码助手直接调用
 ```
 
@@ -41,7 +41,7 @@ content/animations/<id>/{meta.yaml, main.dart, bad.dart}   ← 唯一真相源
 
 - **每条坑带 `source` + `confidence`**（`official-docs` / `measured` / `author-experience` …）——诚实标注依据强度，MCP 返回时一并给 AI。
 - **CI 门禁**：每条 `main.dart` 必须过 `dart format` + `flutter analyze`（very_good_analysis）+ `flutter build web`，跑不过不允许收录。
-- **可复现**：`bad.dart` 演示错误写法，可在 DartPad 里直接对比；内存类坑用 `leak_tracker` 测试佐证。
+- **可复现**：每条都自托管一个**真实运行的 Flutter web 预览**（`npm run previews` 编译，非录屏）；`bad.dart` 演示错误写法可直接对比。
 - **防过时**：每条记 `verifiedOn`，CI 每月重跑发现 Flutter 新版的 deprecation。
 
 ## 快速开始
@@ -52,11 +52,12 @@ npm install
 # 1) 构建目录（校验 schema → catalog.json）
 npm run catalog
 
-# 2) 本地起站点（DartPad 预览 + 复制按钮）
-npm run site:dev
+# 2) 构建自托管预览（把每条 main.dart 编译成真能跑的 Flutter web）
+#    需本地有 Flutter（自动探测 fvm；产物在 site/public/preview/，已 gitignore）
+npm run previews
 
-# 3) 生成 DartPad 预览用的 gist（需要带 gist 权限的 token）
-GITHUB_TOKEN=ghp_xxx npm run sync-gists
+# 3) 本地起站点（内嵌真实运行的预览 + 复制按钮）
+npm run site:dev
 
 # 4) 构建并接入 MCP
 npm run mcp:build
@@ -116,7 +117,7 @@ npm run deploy        # 自动重建 catalog 并打包部署
 ```
 content/animations/   # 唯一数据源（每个动画一个目录）
 schema/               # meta.yaml 的 JSON Schema
-scripts/              # build-catalog（聚合）/ sync-gists（DartPad）
+scripts/              # build-catalog（聚合）/ build-previews（自托管预览）/ sync-gists（DartPad，可选）
 site/                 # Astro 画廊（预览 + 复制按钮）
 mcp/                  # MCP server (TypeScript)
 .github/workflows/    # verify：schema + analyze + format + build

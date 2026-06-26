@@ -1,4 +1,6 @@
 ---
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import Base from '../../layouts/Base.astro';
 import catalog from '../../../../catalog.json';
 
@@ -7,6 +9,12 @@ export function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
+
+// 自托管预览：scripts/build-previews.mjs 把 main.dart 编译成真能跑的 Flutter web，
+// 落在 site/public/preview/<id>/。存在则内嵌运行，不依赖 DartPad / gist / token。
+const previewPath = fileURLToPath(new URL(`../../../public/preview/${entry.id}/index.html`, import.meta.url));
+const hasPreview = existsSync(previewPath);
+const previewUrl = `/preview/${entry.id}/`;
 
 // 「复制给 AI」的现成 prompt：代码 + 坑，让 CC/Cursor 带着避坑提示落地。
 const aiPrompt = [
@@ -47,10 +55,18 @@ const jsonLd = {
   <p class="verified">分类 {entry.category} · 难度 {entry.difficulty}/5 · 验证于 {entry.verifiedOn}</p>
   <p style="color:var(--muted)">{entry.summary}</p>
 
-  {entry.dartpadUrl ? (
+  {hasPreview ? (
+    <div class="preview-wrap">
+      <div class="preview-bar">
+        <span>▶︎ 真实运行（{entry.verifiedOn.split('/')[0].trim()} · 自托管，非录屏）</span>
+        <button class="act tiny" id="replay" title="重新加载，从头播放">↻ 重播</button>
+      </div>
+      <iframe class="dartpad" id="preview" src={previewUrl} title={`${entry.title} 预览`} loading="lazy"></iframe>
+    </div>
+  ) : entry.dartpadUrl ? (
     <iframe class="dartpad" src={entry.dartpadUrl} title="DartPad preview" loading="lazy"></iframe>
   ) : (
-    <p style="color:var(--warn)">⏳ 在线预览未就绪：运行 <code>node scripts/sync-gists.mjs</code> 生成 gist 后即可内嵌。</p>
+    <p style="color:var(--warn)">⏳ 在线预览未就绪：运行 <code>node scripts/build-previews.mjs</code> 生成自托管预览后即可内嵌。</p>
   )}
 
   <div class="btnrow">
@@ -91,5 +107,9 @@ const jsonLd = {
     document.getElementById('copy-ai').addEventListener('click', (e) => {
       navigator.clipboard.writeText(data.prompt).then(() => flash(e.target, '✓ 已复制（粘进 Claude Code 即可）'));
     });
+    // 重播：重载 iframe 让动画从初始状态再跑一遍
+    const replay = document.getElementById('replay');
+    const preview = document.getElementById('preview');
+    if (replay && preview) replay.addEventListener('click', () => { preview.src = preview.src; });
   </script>
 </Base>

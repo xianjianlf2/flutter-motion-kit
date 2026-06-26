@@ -5,6 +5,8 @@ site/dist/
 .astro/
 .wrangler/
 _verify/
+_preview/
+site/public/preview/
 
 # 部署私有配置（不进公开仓库）
 worker/wrangler.toml

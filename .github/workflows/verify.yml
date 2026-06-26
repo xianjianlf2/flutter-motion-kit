@@ -38,4 +38,12 @@ jobs:
             (cd _verify && flutter build web --no-pub >/dev/null) || { echo "build: $dart"; fail=1; }
             echo "::endgroup::"
           done
+          # bad.dart 是「反面教材」：故意违反 lint（漏 dispose 等），所以只验「能编译」——
+          # 杜绝幻觉 API / 语法错误，保证站点上的对照反例真的能跑。
+          for dart in content/animations/*/bad.dart; do
+            echo "::group::$dart (build-only)"
+            cp "$dart" _verify/lib/main.dart
+            (cd _verify && flutter build web --no-pub >/dev/null) || { echo "build: $dart"; fail=1; }
+            echo "::endgroup::"
+          done
           exit $fail

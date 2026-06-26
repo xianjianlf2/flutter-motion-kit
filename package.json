@@ -7,6 +7,7 @@
   "workspaces": ["mcp", "site", "worker"],
   "scripts": {
     "catalog": "node scripts/build-catalog.mjs",
+    "previews": "node scripts/build-previews.mjs",
     "sync-gists": "node scripts/sync-gists.mjs",
     "mcp:build": "npm -w mcp run build",
     "mcp:dev": "npm -w mcp run dev",

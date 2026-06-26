@@ -2,6 +2,7 @@
 // content/animations/*/{meta.yaml,main.dart,bad.dart} -> catalog.json
 // 这是唯一数据源到「站点 + MCP + /api」的单一构建出口。
 import { readdir, readFile, writeFile, stat } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
@@ -40,6 +41,15 @@ for (const id of ids) {
   if (meta.id !== id) {
     errors++;
     console.error(`✗ ${id}: meta.id "${meta.id}" != folder name`);
+    continue;
+  }
+  // provenBy 不能虚标：指向的测试文件必须真实存在，否则「机器证明」是空头支票
+  const badProven = (meta.pitfalls ?? []).filter(
+    (p) => p.provenBy && !existsSync(join(dir, p.provenBy)),
+  );
+  if (badProven.length) {
+    errors++;
+    for (const p of badProven) console.error(`✗ ${id}: provenBy 指向不存在的文件 "${p.provenBy}"`);
     continue;
   }
 

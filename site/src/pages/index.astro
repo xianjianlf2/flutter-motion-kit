@@ -10,7 +10,7 @@ const cursorConfig = Buffer.from(JSON.stringify({ url: `${MCP_ORIGIN}/mcp` })).t
 
 <Base title="Flutter Motion Kit — 可预览的 Flutter 动画集合">
   <p style="color:var(--muted);max-width:680px">
-    每个动画都能在线预览（DartPad 真跑）、给出可直接使用的代码，并标注
+    每个动画都能在线预览（真实运行的 Flutter web，非录屏）、给出可直接使用的代码，并标注
     <strong>对应的坑（含出处与可信度）</strong>。在 Claude Code / Cursor 里可通过 MCP 一键检索复用。
   </p>
 
@@ -24,6 +24,15 @@ const cursorConfig = Buffer.from(JSON.stringify({ url: `${MCP_ORIGIN}/mcp` })).t
     </div>
     <code id="cc-cmd" style="display:block;margin-top:8px;font-size:12px;color:var(--muted)">claude mcp add --transport http flutter-motion {MCP_ORIGIN}/mcp</code>
   </div>
+
+  <a class="playground-cta" href="/playground/">
+    <span class="pg-icon">▶︎</span>
+    <span>
+      <strong>打开交互式 Playground</strong>
+      <span class="pg-sub">拖动滑块实时调参 · 代码同步高亮 · 覆盖 6 大分类</span>
+    </span>
+    <span class="pg-arrow">→</span>
+  </a>
 
   <div class="filters" id="filters">
     <span class="chip" data-cat="all" aria-pressed="true">全部</span>
