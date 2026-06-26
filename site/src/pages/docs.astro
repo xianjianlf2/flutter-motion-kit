@@ -1,0 +1,207 @@
+---
+const REPO = 'https://github.com/xianjianlf2/flutter-motion-kit';
+const confidence = [
+  ['official-docs', '#3fb950', 'rgba(63,185,150,0.15)', 'Source links to api.flutter.dev or flutter.dev. Highest confidence — the framework owns the claim.'],
+  ['measured', '#79c0ff', 'rgba(121,192,255,0.15)', "There's a benchmark or DevTools timeline backing the claim. Reproducible from bad.dart."],
+  ['github-issue', '#4dd0e1', 'rgba(77,208,225,0.15)', "Tracked in flutter/flutter or a maintained package's issue tracker. Linked directly; re-checked monthly."],
+  ['community-consensus', '#a0a8b3', 'rgba(125,133,144,0.18)', 'Multiple independent sources (Discord, Stack Overflow, blogs) agree. We cite the strongest one.'],
+  ['author-experience', '#8b949e', 'rgba(139,148,158,0.15)', 'A maintainer hit it in production. Lowest confidence — take it as a heads-up, not a rule.'],
+];
+const checklist = [
+  ['meta.yaml validates against the schema', 'id (== folder), title, category (one of the 7), difficulty 1–5, tags[], summary, verifiedOn, and a pitfalls array (claim, fix, source, confidence). The schema is enforced in CI.'],
+  ['main.dart passes the machine gate', 'dart format --set-exit-if-changed · flutter analyze (very_good_analysis) · flutter build web. This is what the site compiles a self-hosted preview from.'],
+  ['bad.dart compiles (and shows the wrong way)', 'A counter-example demonstrating the pitfalls. It only needs to build — it intentionally violates lints, proving the pitfall is real, not theoretical.'],
+  ['At least 3 sourced pitfalls', 'Each with claim, fix, source, and an honest confidence level. Prefer official docs; label experience-based ones as author-experience.'],
+  ['provenBy points to a real test (when used)', 'If a pitfall claims a leak/state bug, back it with a test file under test/ — build-catalog fails if provenBy points nowhere.'],
+  ['Verified on the current Flutter stable', "meta.yaml verifiedOn names the SDK you verified against (e.g. Flutter 3.32 / 2026-06). CI re-runs monthly to catch deprecations."],
+  ['Summary explains why, not how', 'One or two sentences answering "when would I reach for this?" — the code already shows how.'],
+];
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Docs — Flutter Motion Kit</title>
+<meta name="description" content="How Flutter Motion Kit works: a single content directory, a verifier on every commit, and a static catalog the site and MCP both read from." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style is:global>
+  html, body { background:#0d1117; color:#e6edf3; font-family:'Inter',system-ui,sans-serif; margin:0; -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  .mono { font-family:'JetBrains Mono',ui-monospace,Menlo,monospace; }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-track { background:#0d1117; }
+  ::-webkit-scrollbar-thumb { background:#21262d; border-radius:6px; border:2px solid #0d1117; }
+  .navlink { transition:color 0.12s; }
+  .navlink:hover { color:#e6edf3 !important; }
+  .toc-link { transition:color 0.12s, border-color 0.12s; padding:5px 0 5px 12px; border-left:2px solid transparent; }
+  .toc-link:hover { color:#e6edf3 !important; border-left-color:#30363d; }
+  h2[id], h3[id] { scroll-margin-top:80px; }
+  .doc-body p { color:#8b949e; line-height:1.65; margin:0 0 14px; font-size:14px; }
+  .doc-body p strong { color:#e6edf3; font-weight:600; }
+  .doc-body code { font-family:'JetBrains Mono',ui-monospace,Menlo,monospace; background:#21262d; color:#e6edf3; padding:1px 6px; border-radius:4px; font-size:12.5px; }
+  .doc-body ul { padding-left:20px; color:#8b949e; line-height:1.7; font-size:14px; }
+  .doc-body ul li { margin-bottom:6px; }
+  .doc-body ul li::marker { color:#4dd0e1; }
+  .doc-body h2 { font-size:22px; font-weight:700; letter-spacing:-0.3px; margin:48px 0 16px; color:#e6edf3; }
+  .doc-body h2:first-child { margin-top:0; }
+  .doc-body h3 { font-size:16px; font-weight:600; margin:28px 0 10px; color:#e6edf3; }
+</style>
+</head>
+<body>
+
+<header style="position:sticky; top:0; z-index:20; backdrop-filter:blur(8px); background:rgba(13,17,23,0.85); border-bottom:1px solid #21262d; padding:12px 32px; display:flex; align-items:center; gap:16px">
+  <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit">
+    <div style="width:26px; height:26px; border-radius:7px; background:conic-gradient(from 230deg at 50% 50%, #4dd0e1, #3fb950, #d29922, #4dd0e1); box-shadow:0 0 0 1px #21262d inset"></div>
+    <div style="display:flex; flex-direction:column; line-height:1">
+      <span style="font-size:13px; font-weight:600">Flutter Motion Kit</span>
+      <span class="mono" style="font-size:10px; color:#6e7681; margin-top:2px">v3.32.0</span>
+    </div>
+  </a>
+  <nav style="display:flex; gap:18px; margin-left:24px; font-size:13px">
+    <a href="/gallery" class="navlink" style="color:#8b949e; text-decoration:none">Gallery</a>
+    <a href="/docs" class="navlink" style="color:#e6edf3; text-decoration:none; font-weight:500">Docs</a>
+    <a href="/verifier" class="navlink" style="color:#8b949e; text-decoration:none">Verifier</a>
+    <a href="/changelog" class="navlink" style="color:#8b949e; text-decoration:none">Changelog</a>
+  </nav>
+  <div style="margin-left:auto; display:flex; gap:8px; align-items:center">
+    <a href="/connect" style="background:#161b22; border:1px solid #30363d; color:#e6edf3; padding:6px 12px; border-radius:6px; font-size:12px; text-decoration:none">Connect</a>
+  </div>
+</header>
+
+<section style="padding:48px 32px 24px; border-bottom:1px solid #21262d">
+  <div style="max-width:1180px; margin:0 auto">
+    <div class="mono" style="color:#4dd0e1; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-bottom:12px">// docs</div>
+    <h1 style="font-size:32px; font-weight:700; letter-spacing:-0.5px; margin:0">How Flutter Motion Kit works</h1>
+    <p style="font-size:14px; color:#8b949e; margin:10px 0 0; max-width:680px; line-height:1.55">A single content directory. A verifier that runs on every commit. A static catalog the site and the MCP both read from. That's the whole product.</p>
+  </div>
+</section>
+
+<section style="padding:40px 32px 80px">
+  <div style="max-width:1180px; margin:0 auto; display:grid; grid-template-columns:220px minmax(0, 1fr); gap:48px">
+
+    <aside style="position:sticky; top:80px; align-self:start; max-height:calc(100vh - 100px); overflow:auto">
+      <div class="mono" style="font-size:10px; color:#7d8590; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:12px">On this page</div>
+      <nav style="display:flex; flex-direction:column; font-size:13px; gap:0">
+        <a class="toc-link" href="#quickstart" style="color:#8b949e; text-decoration:none">Quick start</a>
+        <a class="toc-link" href="#data-model" style="color:#8b949e; text-decoration:none">Single-source data model</a>
+        <a class="toc-link" href="#confidence" style="color:#8b949e; text-decoration:none">Pitfall confidence levels</a>
+        <a class="toc-link" href="#contribute" style="color:#8b949e; text-decoration:none">Contribute an animation</a>
+        <a class="toc-link" href="#checklist" style="color:#8b949e; text-decoration:none; padding-left:24px; font-size:12.5px">— Quality checklist</a>
+      </nav>
+      <div style="margin-top:24px; padding:12px; background:#161b22; border:1px solid #30363d; border-radius:8px">
+        <div class="mono" style="font-size:10px; color:#7d8590; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px">Spec</div>
+        <div style="font-size:12px; color:#e6edf3; margin-bottom:2px">Flutter 3.32 stable</div>
+        <div class="mono" style="font-size:10px; color:#6e7681">verified 2026-06</div>
+      </div>
+    </aside>
+
+    <div class="doc-body">
+
+      <h2 id="quickstart">Quick start</h2>
+      <p>Three steps. None of them block on the others.</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin:18px 0 32px">
+        <div style="background:#161b22; border:1px solid #30363d; border-radius:10px; padding:16px">
+          <div class="mono" style="font-size:11px; color:#4dd0e1; margin-bottom:8px">step 01</div>
+          <div style="font-size:14px; font-weight:600; margin-bottom:6px">Connect the MCP</div>
+          <p style="margin:0; font-size:12.5px; color:#8b949e; line-height:1.5">Add the server to your assistant via the <a href="/connect" style="color:#4dd0e1; text-decoration:none">Connect</a> page. Takes ~30 seconds.</p>
+        </div>
+        <div style="background:#161b22; border:1px solid #30363d; border-radius:10px; padding:16px">
+          <div class="mono" style="font-size:11px; color:#4dd0e1; margin-bottom:8px">step 02</div>
+          <div style="font-size:14px; font-weight:600; margin-bottom:6px">Browse the playground</div>
+          <p style="margin:0; font-size:12.5px; color:#8b949e; line-height:1.5">Open the <a href="/" style="color:#4dd0e1; text-decoration:none">playground</a>, drag a control, watch the code update live.</p>
+        </div>
+        <div style="background:#161b22; border:1px solid #30363d; border-radius:10px; padding:16px">
+          <div class="mono" style="font-size:11px; color:#4dd0e1; margin-bottom:8px">step 03</div>
+          <div style="font-size:14px; font-weight:600; margin-bottom:6px">Copy code + pitfalls</div>
+          <p style="margin:0; font-size:12.5px; color:#8b949e; line-height:1.5">Use the <span style="color:#e6edf3">📋 Copy for AI</span> button. Paste into your assistant.</p>
+        </div>
+      </div>
+
+      <h2 id="data-model">Single-source data model</h2>
+      <p>Every animation lives in <code>content/animations/&lt;id&gt;/</code>. Three files, no duplication. The site, the MCP server, and the verifier all read from the same generated <code>catalog.json</code>.</p>
+      <div style="background:#161b22; border:1px solid #30363d; border-radius:12px; padding:24px; margin:18px 0 24px">
+        <div style="display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:14px; align-items:center">
+          <div style="display:flex; flex-direction:column; gap:8px">
+            <div class="mono" style="font-size:10px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px">source</div>
+            <div class="mono" style="background:#0d1117; border:1px solid #21262d; border-radius:8px; padding:10px 12px; font-size:11.5px; color:#e6edf3">
+              <div style="color:#bc8cff">animations/&lt;id&gt;/</div>
+              <div style="color:#8b949e; padding-left:14px">├ meta.yaml</div>
+              <div style="color:#8b949e; padding-left:14px">├ main.dart</div>
+              <div style="color:#8b949e; padding-left:14px">└ bad.dart</div>
+            </div>
+            <div style="font-size:11px; color:#7d8590; line-height:1.4">hand-edited<br>one PR per change</div>
+          </div>
+          <div class="mono" style="color:#4dd0e1; font-size:24px; text-align:center">→</div>
+          <div style="display:flex; flex-direction:column; gap:8px">
+            <div class="mono" style="font-size:10px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px">verify + build</div>
+            <div class="mono" style="background:#0d1117; border:1px solid #3fb950; border-radius:8px; padding:10px 12px; font-size:11.5px; color:#3fb950">
+              <div>dart format</div>
+              <div>flutter analyze</div>
+              <div>flutter build web</div>
+              <div style="color:#7d8590; margin-top:6px; border-top:1px solid #21262d; padding-top:6px">→ catalog.json</div>
+            </div>
+            <div style="font-size:11px; color:#7d8590; line-height:1.4">CI runs monthly<br>+ on every commit</div>
+          </div>
+          <div class="mono" style="color:#4dd0e1; font-size:24px; text-align:center">→</div>
+          <div style="display:flex; flex-direction:column; gap:8px">
+            <div class="mono" style="font-size:10px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px">consumers</div>
+            <div style="background:#0d1117; border:1px solid #21262d; border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; gap:6px">
+              <div style="display:flex; align-items:center; gap:6px; font-size:12px"><span style="color:#4dd0e1">●</span> <span style="color:#e6edf3">site</span> <span class="mono" style="color:#7d8590; font-size:11px">— playground</span></div>
+              <div style="display:flex; align-items:center; gap:6px; font-size:12px"><span style="color:#bc8cff">●</span> <span style="color:#e6edf3">MCP</span> <span class="mono" style="color:#7d8590; font-size:11px">— 4 tools</span></div>
+              <div style="display:flex; align-items:center; gap:6px; font-size:12px"><span style="color:#3fb950">●</span> <span style="color:#e6edf3">verifier</span> <span class="mono" style="color:#7d8590; font-size:11px">— status</span></div>
+            </div>
+            <div style="font-size:11px; color:#7d8590; line-height:1.4">all read the<br>same catalog</div>
+          </div>
+        </div>
+      </div>
+      <h3>The three source files</h3>
+      <ul>
+        <li><code>meta.yaml</code> — id, title, category, difficulty, tags, summary, <code>verifiedOn</code>, and a pitfalls array (claim, fix, source, confidence). Hand-edited; the schema is enforced in CI.</li>
+        <li><code>main.dart</code> — the canonical good example. Must pass <code>dart format</code>, <code>flutter analyze</code>, and build for web. This is what the site compiles a self-hosted preview from.</li>
+        <li><code>bad.dart</code> — a counter-example demonstrating each pitfall. It compiles but intentionally violates the lints — that's the proof the pitfall is real.</li>
+      </ul>
+
+      <h2 id="confidence">Pitfall confidence levels</h2>
+      <p>Every pitfall carries a confidence pill. Higher confidence ⇒ more weight when an agent (or you) decides whether to act on it.</p>
+      <div style="display:flex; flex-direction:column; gap:10px; margin:18px 0 0">
+        {confidence.map(([label, fg, bg, desc]) => (
+          <div style="display:grid; grid-template-columns:180px minmax(0, 1fr); gap:16px; align-items:start">
+            <span class="mono" style={`background:${bg}; color:${fg}; padding:4px 10px; border-radius:999px; font-size:11px; text-align:center; justify-self:start`}>{label}</span>
+            <div style="font-size:13px; color:#8b949e; line-height:1.55">{desc}</div>
+          </div>
+        ))}
+      </div>
+
+      <h2 id="contribute">Contribute an animation</h2>
+      <p>Fork, add a directory under <code>content/animations/</code>, open a PR. CI runs the verifier on your branch — once everything's green, a maintainer reviews the pitfalls.</p>
+      <h3 id="checklist">Quality checklist</h3>
+      <p>The PR template includes this. None of it is optional.</p>
+      <div style="background:#161b22; border:1px solid #30363d; border-radius:10px; padding:18px; margin-top:14px">
+        {checklist.map(([title, detail], i) => (
+          <div style={`display:flex; align-items:flex-start; gap:12px; padding:8px 0${i < checklist.length - 1 ? '; border-bottom:1px solid #21262d' : ''}`}>
+            <span style="color:#3fb950; font-size:13px; flex-shrink:0; margin-top:2px">☐</span>
+            <div style="flex:1">
+              <div style="font-size:13px; color:#e6edf3; font-weight:500">{title}</div>
+              <div style="font-size:12px; color:#8b949e; margin-top:3px; line-height:1.5">{detail}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style="display:flex; gap:12px; margin-top:24px">
+        <a href={`${REPO}/blob/main/.github/PULL_REQUEST_TEMPLATE.md`} target="_blank" rel="noopener" style="background:#4dd0e1; color:#0d1117; padding:9px 16px; border-radius:8px; font-size:13px; font-weight:600; text-decoration:none">↗ Open the PR template</a>
+        <a href={`${REPO}/blob/main/CONTRIBUTING.md`} target="_blank" rel="noopener" style="background:#161b22; border:1px solid #30363d; color:#e6edf3; padding:9px 16px; border-radius:8px; font-size:13px; text-decoration:none">↗ Read CONTRIBUTING.md</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer style="padding:32px; border-top:1px solid #21262d; text-align:center">
+  <div class="mono" style="font-size:11px; color:#6e7681">Flutter Motion Kit · machine-verified, monthly · MIT</div>
+</footer>
+
+</body>
+</html>

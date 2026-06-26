@@ -1,0 +1,124 @@
+---
+const tagStyle = {
+  added: ['rgba(77,208,225,0.12)', '#4dd0e1'],
+  're-verified': ['rgba(63,185,150,0.12)', '#3fb950'],
+  fixed: ['rgba(210,153,34,0.12)', '#d29922'],
+  deprecated: ['rgba(255,123,114,0.12)', '#ff7b72'],
+};
+const fmt = (d, opts) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { ...opts, timeZone: 'UTC' });
+
+const raw = [
+  { date: '2026-06-26', items: [
+    { tag: 'added', title: 'Eight new animations — physics & custom-painter no longer empty', detail: 'Spring drag-and-release, CustomPainter progress ring, AnimatedList insert/remove, swipe-to-dismiss, 3D card flip, AnimatedSize expand/collapse, collapsing SliverAppBar, and a draggable bottom sheet. Each ships a bad.dart and sourced pitfalls.', href: '/gallery' },
+    { tag: 'added', title: 'Interactive playground is now the landing page', detail: 'Drag a control, watch the code highlight live, every example auto-loops. The verified catalog moved to /gallery.', href: '/' },
+    { tag: 'added', title: 'Verifier, Connect & Docs', detail: 'Machine-verification status, one-click MCP install for Claude Code / Cursor / VS Code, and a how-it-works guide — all data-driven from the catalog.', href: '/verifier' },
+    { tag: 'deprecated', title: 'AnimatedContainer & AnimatedSwitcher removed', detail: 'Curated out the two trivial entries to keep the catalog high-signal — popular, error-prone, high-impact only.', href: null },
+    { tag: 're-verified', title: 'Whole catalog green on Flutter 3.32', detail: 'All 12 entries pass dart format + flutter analyze + build web; bad.dart counter-examples compile. CI re-runs on every push.', href: '/verifier' },
+  ]},
+  { date: '2026-06-01', items: [
+    { tag: 're-verified', title: 'June monthly run', detail: 'Full check suite re-run on Flutter 3.32.0 stable on the 1st, per the anti-rot policy. No deprecations surfaced.', href: '/verifier' },
+  ]},
+];
+
+const groups = raw.map((g) => ({
+  dateLabel: fmt(g.date, { month: 'short', day: 'numeric', year: 'numeric' }),
+  weekday: fmt(g.date, { weekday: 'long' }),
+  items: g.items.map((it) => ({ ...it, tagBg: tagStyle[it.tag][0], tagFg: tagStyle[it.tag][1], hasLink: !!it.href })),
+}));
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Changelog — Flutter Motion Kit</title>
+<meta name="description" content="What changed, and when. Every entry re-verified monthly on the latest Flutter stable." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style is:global>
+  html, body { background:#0d1117; color:#e6edf3; font-family:'Inter',system-ui,sans-serif; margin:0; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:'JetBrains Mono',ui-monospace,Menlo,monospace; }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-track { background:#0d1117; }
+  ::-webkit-scrollbar-thumb { background:#21262d; border-radius:6px; border:2px solid #0d1117; }
+  .navlink { transition:color 0.12s; }
+  .navlink:hover { color:#e6edf3 !important; }
+  .entry { transition:background 0.12s, border-color 0.12s; }
+  .entry:hover { background:rgba(77,208,225,0.04); border-color:#30363d; }
+  .entry:hover .entry-link { color:#4dd0e1; }
+</style>
+</head>
+<body>
+
+<header style="position:sticky; top:0; z-index:20; backdrop-filter:blur(8px); background:rgba(13,17,23,0.85); border-bottom:1px solid #21262d; padding:12px 32px; display:flex; align-items:center; gap:16px">
+  <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit">
+    <div style="width:26px; height:26px; border-radius:7px; background:conic-gradient(from 230deg at 50% 50%, #4dd0e1, #3fb950, #d29922, #4dd0e1); box-shadow:0 0 0 1px #21262d inset"></div>
+    <div style="display:flex; flex-direction:column; line-height:1">
+      <span style="font-size:13px; font-weight:600">Flutter Motion Kit</span>
+      <span class="mono" style="font-size:10px; color:#6e7681; margin-top:2px">v3.32.0</span>
+    </div>
+  </a>
+  <nav style="display:flex; gap:18px; margin-left:24px; font-size:13px">
+    <a href="/gallery" class="navlink" style="color:#8b949e; text-decoration:none">Gallery</a>
+    <a href="/docs" class="navlink" style="color:#8b949e; text-decoration:none">Docs</a>
+    <a href="/verifier" class="navlink" style="color:#8b949e; text-decoration:none">Verifier</a>
+    <a href="/changelog" class="navlink" style="color:#e6edf3; text-decoration:none; font-weight:500">Changelog</a>
+  </nav>
+  <div style="margin-left:auto; display:flex; gap:8px; align-items:center">
+    <a href="/connect" style="background:#161b22; border:1px solid #30363d; color:#e6edf3; padding:6px 12px; border-radius:6px; font-size:12px; text-decoration:none">Connect</a>
+  </div>
+</header>
+
+<section style="padding:48px 32px 24px; border-bottom:1px solid #21262d">
+  <div style="max-width:920px; margin:0 auto">
+    <div class="mono" style="color:#4dd0e1; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-bottom:12px">// changelog</div>
+    <h1 style="font-size:32px; font-weight:700; letter-spacing:-0.5px; margin:0">What changed, and when.</h1>
+    <div style="margin-top:24px; background:#161b22; border:1px solid #30363d; border-left:3px solid #3fb950; border-radius:8px; padding:14px 18px; display:flex; align-items:center; gap:12px; max-width:680px">
+      <span style="color:#3fb950; font-size:18px">↻</span>
+      <div>
+        <div style="font-size:13px; color:#e6edf3; font-weight:500">Anti-rot policy: re-verified monthly.</div>
+        <div style="font-size:12px; color:#8b949e; margin-top:3px; line-height:1.5">Every entry runs the full check suite on the latest Flutter stable on the 1st of each month. <a href="/verifier" style="color:#4dd0e1; text-decoration:none">See current status →</a></div>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:22px; flex-wrap:wrap">
+      <span class="mono" style="background:rgba(77,208,225,0.12); color:#4dd0e1; padding:3px 10px; border-radius:999px; font-size:11px">added</span>
+      <span class="mono" style="background:rgba(63,185,150,0.12); color:#3fb950; padding:3px 10px; border-radius:999px; font-size:11px">re-verified</span>
+      <span class="mono" style="background:rgba(210,153,34,0.12); color:#d29922; padding:3px 10px; border-radius:999px; font-size:11px">fixed</span>
+      <span class="mono" style="background:rgba(255,123,114,0.12); color:#ff7b72; padding:3px 10px; border-radius:999px; font-size:11px">deprecated</span>
+    </div>
+  </div>
+</section>
+
+<section style="padding:40px 32px 80px">
+  <div style="max-width:920px; margin:0 auto">
+    {groups.map((group) => (
+      <div style="display:grid; grid-template-columns:120px minmax(0, 1fr); gap:32px; margin-bottom:36px">
+        <div>
+          <div class="mono" style="font-size:13px; color:#e6edf3; font-weight:500">{group.dateLabel}</div>
+          <div class="mono" style="font-size:11px; color:#7d8590; margin-top:3px">{group.weekday}</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px">
+          {group.items.map((item) => (
+            <a class="entry" href={item.href ?? '#'} style="background:#161b22; border:1px solid #21262d; border-radius:10px; padding:14px 16px; text-decoration:none; color:inherit; display:flex; align-items:flex-start; gap:14px">
+              <span class="mono" style={`background:${item.tagBg}; color:${item.tagFg}; padding:3px 9px; border-radius:999px; font-size:11px; flex-shrink:0; min-width:78px; text-align:center`}>{item.tag}</span>
+              <div style="flex:1">
+                <div class="entry-link" style="font-size:14px; color:#e6edf3; font-weight:500; transition:color 0.12s">{item.title}</div>
+                <div style="font-size:12.5px; color:#8b949e; margin-top:4px; line-height:1.5">{item.detail}</div>
+              </div>
+              {item.hasLink ? <span class="mono" style="font-size:11px; color:#6e7681; flex-shrink:0; align-self:center">↗</span> : null}
+            </a>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<footer style="padding:32px; border-top:1px solid #21262d; text-align:center">
+  <div class="mono" style="font-size:11px; color:#6e7681">Flutter Motion Kit · machine-verified, monthly · MIT</div>
+</footer>
+
+</body>
+</html>

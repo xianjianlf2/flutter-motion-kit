@@ -1,0 +1,215 @@
+---
+const MCP = 'https://mcp.markxian.cn/mcp';
+const STATS = 'https://mcp.markxian.cn/stats';
+const claudeCmd = `claude mcp add --transport http flutter-motion ${MCP}`;
+const cfg = JSON.stringify({ url: MCP });
+const cursorLink = `cursor://anysphere.cursor-deeplink/mcp/install?name=flutter-motion&config=${Buffer.from(cfg).toString('base64')}`;
+const vscodeLink = `https://insiders.vscode.dev/redirect/mcp/install?name=flutter-motion&config=${encodeURIComponent(cfg)}`;
+
+const tools = [
+  ['search_flutter_animation', 'Find animations by name, tag, or category. Returns ranked ids with one-line summaries.'],
+  ['get_animation', 'Fetch one entry: verified main.dart, the wrong-way badCode, and the full pitfalls list with sources.'],
+  ['list_pitfalls', 'Surface every sourced gotcha in the catalog, optionally filtered by category.'],
+  ['list_categories', 'Enumerate the taxonomy — implicit / explicit / hero / staggered / physics / custom-painter — with counts.'],
+];
+
+const prompts = [
+  ['↗ list', "Add a staggered list entrance like flutter-motion-kit's, and follow its pitfalls."],
+  ['↗ pick', "Suggest the cheapest implicit animation for a button that morphs into a card. Use flutter-motion-kit to ground your answer."],
+  ['↗ audit', "Audit my custom_painter.dart against flutter-motion-kit's CustomPainter pitfalls and patch the leaks."],
+];
+
+const card = "background:#161b22; border:1px solid #30363d; border-radius:12px; padding:18px; display:flex; flex-direction:column; gap:14px";
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Connect — Flutter Motion Kit</title>
+<meta name="description" content="Wire any AI assistant (Claude Code / Cursor / VS Code) to verified Flutter animations via one remote MCP server — four tools, a machine-readable catalog." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style is:global>
+  html, body { background:#0d1117; color:#e6edf3; font-family:'Inter',system-ui,sans-serif; margin:0; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:'JetBrains Mono',ui-monospace,Menlo,monospace; }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-track { background:#0d1117; }
+  ::-webkit-scrollbar-thumb { background:#21262d; border-radius:6px; border:2px solid #0d1117; }
+  @keyframes livepulse { 0%,100% { opacity:1 } 50% { opacity:0.35 } }
+  .live-dot { animation:livepulse 1.6s infinite; }
+  @keyframes toastIn { from { opacity:0; transform:translateY(8px) translateX(-50%) } to { opacity:1; transform:translateY(0) translateX(-50%) } }
+  .toast { animation:toastIn 0.18s ease-out; }
+  .navlink { transition:color 0.12s; }
+  .navlink:hover { color:#e6edf3 !important; }
+  .connect-card { transition:transform 0.18s, border-color 0.18s; }
+  .connect-card:hover { transform:translateY(-2px); border-color:#4dd0e1; }
+  .copy-btn { transition:background 0.12s, color 0.12s; }
+  .copy-btn:hover { background:#21262d; color:#4dd0e1; }
+  .tool-row { transition:background 0.12s; }
+  .tool-row:hover { background:rgba(77,208,225,0.04); }
+</style>
+</head>
+<body>
+
+<header style="position:sticky; top:0; z-index:20; backdrop-filter:blur(8px); background:rgba(13,17,23,0.85); border-bottom:1px solid #21262d; padding:12px 32px; display:flex; align-items:center; gap:16px">
+  <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit">
+    <div style="width:26px; height:26px; border-radius:7px; background:conic-gradient(from 230deg at 50% 50%, #4dd0e1, #3fb950, #d29922, #4dd0e1); box-shadow:0 0 0 1px #21262d inset"></div>
+    <div style="display:flex; flex-direction:column; line-height:1">
+      <span style="font-size:13px; font-weight:600">Flutter Motion Kit</span>
+      <span class="mono" style="font-size:10px; color:#6e7681; margin-top:2px">v3.32.0</span>
+    </div>
+  </a>
+  <nav style="display:flex; gap:18px; margin-left:24px; font-size:13px">
+    <a href="/gallery" class="navlink" style="color:#8b949e; text-decoration:none">Gallery</a>
+    <a href="/docs" class="navlink" style="color:#8b949e; text-decoration:none">Docs</a>
+    <a href="/verifier" class="navlink" style="color:#8b949e; text-decoration:none">Verifier</a>
+    <a href="/changelog" class="navlink" style="color:#8b949e; text-decoration:none">Changelog</a>
+  </nav>
+  <div style="margin-left:auto; display:flex; gap:8px; align-items:center">
+    <a href="/connect" style="background:#4dd0e1; border:none; color:#0d1117; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; text-decoration:none">Connect</a>
+  </div>
+</header>
+
+<section style="padding:56px 32px 32px; background:radial-gradient(900px 360px at 12% -10%, rgba(77,208,225,0.10), transparent 60%); border-bottom:1px solid #21262d">
+  <div style="max-width:1080px; margin:0 auto">
+    <div class="mono" style="color:#4dd0e1; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-bottom:14px">// connect</div>
+    <h1 style="font-size:40px; line-height:1.1; font-weight:700; letter-spacing:-0.7px; margin:0 0 14px; max-width:780px">Wire any AI assistant to verified Flutter animations.</h1>
+    <p style="font-size:16px; color:#8b949e; max-width:680px; line-height:1.55; margin:0">One MCP server, four tools, a machine-readable catalog. Your agent stops hallucinating <span class="mono" style="color:#e6edf3">AnimationController</span> APIs and starts copying from snippets that actually compile.</p>
+    <div id="devs" style="display:none; align-items:center; gap:10px; margin-top:24px; font-size:12px; color:#8b949e; padding:7px 14px; background:#0d1117; border:1px solid #21262d; border-radius:999px" class="mono">
+      <span class="live-dot" style="width:7px; height:7px; border-radius:50%; background:#3fb950; box-shadow:0 0 8px #3fb950"></span>
+      <span id="devs-text"></span>
+    </div>
+  </div>
+</section>
+
+<section style="padding:40px 32px; background:#0d1117">
+  <div style="max-width:1080px; margin:0 auto">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:18px">
+      <h2 style="font-size:18px; font-weight:600; margin:0">1. Connect your assistant</h2>
+      <span class="mono" style="font-size:11px; color:#6e7681">~30 seconds</span>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px">
+
+      <div class="connect-card" style={card}>
+        <div style="display:flex; align-items:center; gap:10px">
+          <div class="mono" style="width:32px; height:32px; border-radius:8px; background:#21262d; display:flex; align-items:center; justify-content:center; font-size:14px; color:#d29922">CC</div>
+          <div><div style="font-size:14px; font-weight:600">Claude Code</div><div class="mono" style="font-size:10px; color:#6e7681">CLI · MCP transport: http</div></div>
+        </div>
+        <p style="font-size:12.5px; color:#8b949e; margin:0; line-height:1.5">Run once in your project. Claude Code persists the server in <span class="mono" style="color:#e6edf3">.mcp.json</span>.</p>
+        <div style="background:#0d1117; border:1px solid #21262d; border-radius:8px; padding:10px 12px; display:flex; align-items:center; gap:8px">
+          <code class="mono" style="font-size:11.5px; color:#e6edf3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1">{claudeCmd}</code>
+          <button class="copy-btn" data-copy={claudeCmd} data-label="Claude Code command copied" style="background:transparent; border:1px solid #30363d; color:#8b949e; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer; font-family:'JetBrains Mono',monospace; flex-shrink:0">copy</button>
+        </div>
+      </div>
+
+      <div class="connect-card" style={card}>
+        <div style="display:flex; align-items:center; gap:10px">
+          <div class="mono" style="width:32px; height:32px; border-radius:8px; background:#21262d; display:flex; align-items:center; justify-content:center; font-size:14px; color:#4dd0e1">CR</div>
+          <div><div style="font-size:14px; font-weight:600">Cursor</div><div class="mono" style="font-size:10px; color:#6e7681">Editor · one-click deep link</div></div>
+        </div>
+        <p style="font-size:12.5px; color:#8b949e; margin:0; line-height:1.5">Opens Cursor and pre-fills the MCP server entry. Hit save.</p>
+        <a href={cursorLink} style="background:#4dd0e1; color:#0d1117; padding:9px 14px; border-radius:8px; font-size:13px; font-weight:600; text-decoration:none; text-align:center">＋ Add to Cursor</a>
+        <button class="copy-btn" data-copy={cursorLink} data-label="Cursor install link copied" style="background:transparent; border:1px solid #30363d; color:#8b949e; padding:5px 10px; border-radius:6px; font-size:11px; cursor:pointer; font-family:'JetBrains Mono',monospace">copy install link</button>
+      </div>
+
+      <div class="connect-card" style={card}>
+        <div style="display:flex; align-items:center; gap:10px">
+          <div class="mono" style="width:32px; height:32px; border-radius:8px; background:#21262d; display:flex; align-items:center; justify-content:center; font-size:14px; color:#79c0ff">VS</div>
+          <div><div style="font-size:14px; font-weight:600">VS Code</div><div class="mono" style="font-size:10px; color:#6e7681">Editor · MCP install redirect</div></div>
+        </div>
+        <p style="font-size:12.5px; color:#8b949e; margin:0; line-height:1.5">Adds the server to your user <span class="mono" style="color:#e6edf3">settings.json</span> under <span class="mono" style="color:#e6edf3">mcp.servers</span>.</p>
+        <a href={vscodeLink} style="background:#161b22; color:#e6edf3; border:1px solid #4dd0e1; padding:9px 14px; border-radius:8px; font-size:13px; font-weight:600; text-decoration:none; text-align:center">＋ Add to VS Code</a>
+        <button class="copy-btn" data-copy={vscodeLink} data-label="VS Code install link copied" style="background:transparent; border:1px solid #30363d; color:#8b949e; padding:5px 10px; border-radius:6px; font-size:11px; cursor:pointer; font-family:'JetBrains Mono',monospace">copy install link</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section style="padding:40px 32px; background:#0d1117; border-top:1px solid #21262d">
+  <div style="max-width:1080px; margin:0 auto">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px">
+      <h2 style="font-size:18px; font-weight:600; margin:0">2. The four MCP tools</h2>
+      <span class="mono" style="font-size:11px; color:#6e7681">your assistant calls these by name</span>
+    </div>
+    <p style="font-size:13px; color:#8b949e; margin:0 0 18px; max-width:640px">Small surface area on purpose. Every tool returns sourced, machine-verified data — never freeform.</p>
+    <div style="background:#161b22; border:1px solid #30363d; border-radius:12px; overflow:hidden">
+      {tools.map(([name, desc], i) => (
+        <div class="tool-row" style={`display:grid; grid-template-columns:minmax(220px, 1fr) minmax(0, 2fr); gap:18px; padding:14px 18px; align-items:center${i < tools.length - 1 ? '; border-bottom:1px solid #21262d' : ''}`}>
+          <code class="mono" style="font-size:13px; color:#4dd0e1">{name}</code>
+          <div style="font-size:13px; color:#8b949e; line-height:1.5">{desc}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<section style="padding:40px 32px; background:#0d1117; border-top:1px solid #21262d">
+  <div style="max-width:1080px; margin:0 auto">
+    <h2 style="font-size:18px; font-weight:600; margin:0 0 6px">3. Example prompts</h2>
+    <p style="font-size:13px; color:#8b949e; margin:0 0 18px">Paste these into your assistant. It will reach for the MCP tools automatically.</p>
+    <div style="display:flex; flex-direction:column; gap:10px">
+      {prompts.map(([tag, text]) => (
+        <div style="background:#161b22; border:1px solid #30363d; border-radius:10px; padding:14px 16px; display:flex; align-items:flex-start; gap:14px">
+          <span class="mono" style="font-size:11px; color:#bc8cff; margin-top:2px; flex-shrink:0">{tag}</span>
+          <div style="flex:1; font-size:14px; color:#e6edf3; line-height:1.55; font-style:italic">"{text}"</div>
+          <button class="copy-btn" data-copy={text} data-label="Prompt copied" style="background:transparent; border:1px solid #30363d; color:#8b949e; padding:4px 9px; border-radius:5px; font-size:11px; cursor:pointer; font-family:'JetBrains Mono',monospace; flex-shrink:0">copy</button>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<section style="padding:40px 32px 60px; background:#0d1117; border-top:1px solid #21262d">
+  <div style="max-width:1080px; margin:0 auto">
+    <div class="mono" style="color:#bc8cff; font-size:11px; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px">// for agents</div>
+    <h2 style="font-size:18px; font-weight:600; margin:0 0 6px">The catalog is machine-readable.</h2>
+    <p style="font-size:13px; color:#8b949e; margin:0 0 18px; max-width:640px">If your agent doesn't speak MCP, fall back to these static endpoints. Same data, no transport.</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px">
+      <a href="/llms.txt" style="background:#161b22; border:1px solid #30363d; border-radius:10px; padding:16px; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:8px">
+        <div style="display:flex; align-items:center; gap:10px"><span class="mono" style="font-size:13px; color:#4dd0e1">/llms.txt</span></div>
+        <div style="font-size:12.5px; color:#8b949e; line-height:1.5">Flat text crawler index. One line per animation + its URL. Drop it into a vector store.</div>
+      </a>
+      <a href="/api/animations.json" style="background:#161b22; border:1px solid #30363d; border-radius:10px; padding:16px; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:8px">
+        <div style="display:flex; align-items:center; gap:10px"><span class="mono" style="font-size:13px; color:#4dd0e1">/api/animations.json</span></div>
+        <div style="font-size:12.5px; color:#8b949e; line-height:1.5">Full catalog. Same shape as the MCP <span class="mono" style="color:#e6edf3">get_animation</span> response, in one fetch.</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer style="padding:32px; border-top:1px solid #21262d; text-align:center">
+  <div class="mono" style="font-size:11px; color:#6e7681">Flutter Motion Kit · machine-verified, monthly · MIT</div>
+</footer>
+
+<div id="toast" class="toast mono" style="display:none; position:fixed; bottom:24px; left:50%; background:#161b22; border:1px solid #4dd0e1; color:#4dd0e1; padding:8px 14px; border-radius:8px; font-size:12px; z-index:50; box-shadow:0 12px 40px -10px rgba(77,208,225,0.35)"></div>
+
+<script define:vars={{ STATS }}>
+  const toast = document.getElementById('toast');
+  let tt;
+  const flash = (label) => {
+    if (!toast) return;
+    toast.textContent = '✓ ' + label;
+    toast.style.display = 'block';
+    clearTimeout(tt);
+    tt = setTimeout(() => { toast.style.display = 'none'; }, 1600);
+  };
+  document.querySelectorAll('.copy-btn').forEach((b) => {
+    b.addEventListener('click', () => {
+      navigator.clipboard.writeText(b.getAttribute('data-copy') || '').then(() => flash(b.getAttribute('data-label') || 'Copied'));
+    });
+  });
+  // Live developers-connected count from the MCP /stats endpoint
+  fetch(STATS).then((r) => r.json()).then((d) => {
+    if (typeof d.connections === 'number') {
+      document.getElementById('devs-text').textContent = `${d.connections.toLocaleString()} developers connected`;
+      document.getElementById('devs').style.display = 'inline-flex';
+    }
+  }).catch(() => {});
+</script>
+
+</body>
+</html>
