@@ -43,7 +43,10 @@ jobs:
       - run: npm ci
       - run: node scripts/build-catalog.mjs && npm -w mcp run build
       # 私有配置不在仓库里：从 secret 还原 worker/wrangler.toml
-      - run: printf '%s' "${{ secrets.WRANGLER_TOML }}" > worker/wrangler.toml
+      # 经由 env 传入，避免 secret 里的双引号把 shell 字符串截断（会丢引号 → wrangler 解析报错）
+      - run: printf '%s' "$WRANGLER_TOML" > worker/wrangler.toml
+        env:
+          WRANGLER_TOML: ${{ secrets.WRANGLER_TOML }}
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
