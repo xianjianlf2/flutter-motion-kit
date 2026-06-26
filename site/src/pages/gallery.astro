@@ -8,10 +8,10 @@ const MCP_ORIGIN = import.meta.env.PUBLIC_MCP_ORIGIN ?? 'https://flutter-motion-
 const cursorConfig = Buffer.from(JSON.stringify({ url: `${MCP_ORIGIN}/mcp` })).toString('base64');
 ---
 
-<Base title="Flutter Motion Kit — previewable Flutter animations">
+<Base title="Verified catalog — Flutter Motion Kit">
   <p style="color:var(--muted);max-width:680px">
-    Every animation runs live in the browser (real Flutter web, not a screen recording),
-    ships copy-paste code, and is annotated with
+    The verified catalog: every animation runs live in the browser (real Flutter web, not a
+    screen recording), ships copy-paste code, and is annotated with
     <strong>its pitfalls (with sources and confidence)</strong>. Search and reuse them straight
     from Claude Code / Cursor via MCP.
   </p>
@@ -27,7 +27,7 @@ const cursorConfig = Buffer.from(JSON.stringify({ url: `${MCP_ORIGIN}/mcp` })).t
     <code id="cc-cmd" style="display:block;margin-top:8px;font-size:12px;color:var(--muted)">claude mcp add --transport http flutter-motion {MCP_ORIGIN}/mcp</code>
   </div>
 
-  <a class="playground-cta" href="/playground/">
+  <a class="playground-cta" href="/">
     <span class="pg-icon">▶︎</span>
     <span>
       <strong>Open the interactive Playground</strong>

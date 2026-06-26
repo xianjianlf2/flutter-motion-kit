@@ -3,7 +3,7 @@ import catalog from '../../../catalog.json';
 
 export const GET: APIRoute = ({ site }) => {
   const base = site?.href.replace(/\/$/, '') ?? '';
-  const paths = ['/', ...catalog.entries.map((e) => `/a/${e.id}`)];
+  const paths = ['/', '/gallery', ...catalog.entries.map((e) => `/a/${e.id}`)];
   const body =
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +

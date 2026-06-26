@@ -6,7 +6,7 @@
 [![animations](https://img.shields.io/badge/dynamic/json?url=https://mcp.markxian.cn/stats&query=$.animations&label=animations&color=blue)](https://motion.markxian.cn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**🌐 Live: [motion.markxian.cn](https://motion.markxian.cn)** · **🎛 Interactive playground: [motion.markxian.cn/playground](https://motion.markxian.cn/playground/)**
+**🎛 Live interactive playground: [motion.markxian.cn](https://motion.markxian.cn)** · **📚 Verified catalog: [motion.markxian.cn/gallery](https://motion.markxian.cn/gallery)**
 
 ## One-click connect (remote MCP · zero install)
 
@@ -118,7 +118,7 @@ On the site side: `cp site/.env.example site/.env` and set `PUBLIC_MCP_ORIGIN` t
 content/animations/   # single source of truth (one directory per animation)
 schema/               # JSON Schema for meta.yaml
 scripts/              # build-catalog (aggregate) / build-previews (self-hosted previews) / sync-gists (DartPad, optional)
-site/                 # Astro gallery (previews + copy buttons) + /playground (interactive)
+site/                 # interactive playground at / + verified gallery at /gallery (Astro)
 mcp/                  # MCP server (TypeScript)
 .github/workflows/    # verify: schema + analyze + format + build
 ```

@@ -120,10 +120,19 @@ class Component extends React.Component {
         devsConnected: Math.max(800, s.devsConnected + Math.floor((Math.random() - 0.45) * 7))
       }));
     }, 2200);
+    // Auto-loop every example so previews keep animating on their own (no need to click Replay)
+    this._autoTimer = setInterval(() => {
+      this.setState(s => {
+        const rk = { ...s.replayKey };
+        this.getData().forEach(e => { rk[e.id] = (rk[e.id] || 0) + 1; });
+        return { replayKey: rk };
+      });
+    }, 2600);
   }
 
   componentWillUnmount() {
     clearInterval(this._devsTimer);
+    clearInterval(this._autoTimer);
   }
 
   // ---------- Data ----------
@@ -464,10 +473,12 @@ return AnimatedBuilder(
       case 'animated-container': {
         const t = this.curveToEase(vals.curve);
         const transition = { duration: Math.max(0.05, vals.duration / 1000), ...t };
+        // Pulse between the chosen size and a smaller one each auto-tick, so it keeps moving
+        const sz = (replay % 2 === 0 ? vals.size : vals.size * 0.6) * m;
         return React.createElement(motion.div, {
           animate: {
-            width: vals.size * m,
-            height: vals.size * m,
+            width: sz,
+            height: sz,
             borderRadius: vals.radius * m,
             backgroundColor: vals.color,
           },
@@ -953,8 +964,8 @@ return AnimatedBuilder(
           )
         ),
         React.createElement('nav', { style: { display: 'flex', gap: 18, marginLeft: 24, fontSize: 13, color: '#8b949e' } },
-          ['Gallery', 'Docs', 'Verifier', 'Changelog'].map((n, i) =>
-            React.createElement('a', { key: n, href: '#', onClick: (e) => e.preventDefault(),
+          [['Gallery', '/gallery'], ['Docs', '#'], ['Verifier', '#'], ['Changelog', '#']].map(([n, href], i) =>
+            React.createElement('a', { key: n, href, onClick: (e) => { if (href === '#') e.preventDefault(); },
               style: { color: i === 0 ? '#e6edf3' : '#8b949e', textDecoration: 'none' } }, n)
           )
         ),
@@ -985,7 +996,8 @@ return AnimatedBuilder(
 function HeroDemo({ fm, vals, replay, mini }) {
   const { motion } = fm;
   const [expanded, setExpanded] = React.useState(false);
-  React.useEffect(() => { setExpanded(false); }, [replay]);
+  // Auto-toggle on each replay tick so the Hero keeps expanding/collapsing on its own
+  React.useEffect(() => { setExpanded(replay % 2 === 1); }, [replay]);
   const m = mini ? 0.5 : 1;
   const startW = vals.startW * m;
   const startH = vals.startH * m;
