@@ -1,0 +1,33 @@
+id: card-flip-3d
+title: 3D card flip
+category: explicit
+difficulty: 3
+tags: [card, flip, 3d, Transform, Matrix4, AnimatedBuilder, controller]
+summary: >
+  Tap a card to flip it 180° around the Y axis and reveal the back. An
+  AnimationController drives an AnimatedBuilder + Transform whose Matrix4 carries
+  a perspective term so the rotation reads as a real card, not a flat squash.
+verifiedOn: "Flutter 3.32 / 2026-06"
+gistId: ""
+docs:
+  - https://api.flutter.dev/flutter/widgets/Transform-class.html
+  - https://api.flutter.dev/flutter/animation/AnimationController-class.html
+  - https://api.flutter.dev/flutter/widgets/AnimatedBuilder-class.html
+  - https://api.flutter.dev/flutter/vector_math_64/Matrix4/setEntry.html
+pitfalls:
+  - claim: Without a perspective term the rotation looks flat — the card just squashes horizontally instead of turning in depth.
+    fix: Seed the matrix with perspective before rotating, e.g. Matrix4.identity()..setEntry(3, 2, 0.0015)..rotateY(angle).
+    source: https://api.flutter.dev/flutter/widgets/Transform-class.html
+    confidence: community-consensus
+  - claim: The back face renders mirrored, so its text/content reads backwards once the flip passes 90°.
+    fix: Counter-rotate the back child by pi (Transform with Matrix4.rotationY(pi)) so it un-mirrors after the parent flip.
+    source: author-experience
+    confidence: author-experience
+  - claim: Swapping front/back at the wrong moment shows the wrong face through the card edge.
+    fix: Switch from front to back exactly when controller.value crosses 0.5 (the 90° midpoint), where the card is edge-on.
+    source: community-consensus
+    confidence: community-consensus
+  - claim: Omitting Transform alignment or forgetting to dispose the controller off-centers the flip and leaks the Ticker.
+    fix: Set alignment Alignment.center on the Transform and call _controller.dispose() in State.dispose().
+    source: https://api.flutter.dev/flutter/animation/AnimationController-class.html
+    confidence: official-docs

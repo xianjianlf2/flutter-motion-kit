@@ -1,0 +1,33 @@
+id: animated-list-insert-remove
+title: AnimatedList insert & remove
+category: explicit
+difficulty: 3
+tags: [list, AnimatedList, GlobalKey, SizeTransition, FadeTransition]
+summary: >
+  An AnimatedList driven by a GlobalKey<AnimatedListState>. Adding calls
+  insertItem with a SizeTransition+FadeTransition entrance; tapping removes via
+  removeItem, whose builder animates the just-removed item out.
+verifiedOn: "Flutter 3.32 / 2026-06"
+gistId: ""
+docs:
+  - https://api.flutter.dev/flutter/widgets/AnimatedList-class.html
+  - https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html
+  - https://api.flutter.dev/flutter/widgets/AnimatedListState/removeItem.html
+  - https://api.flutter.dev/flutter/widgets/SizeTransition-class.html
+pitfalls:
+  - claim: AnimatedList only animates when you drive it through AnimatedListState; the widget itself has no add/remove API.
+    fix: Hold a GlobalKey<AnimatedListState> and call _key.currentState!.insertItem(index) / removeItem(index, builder) to trigger the transitions.
+    source: https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html
+    confidence: official-docs
+  - claim: removeItem's builder receives an index-free callback, so reading the backing list inside it renders the wrong (shifted) item.
+    fix: Capture the removed value before mutating the list, then close over it in the removeItem builder so the exit animation shows the item that actually left.
+    source: https://api.flutter.dev/flutter/widgets/AnimatedListState/removeItem.html
+    confidence: official-docs
+  - claim: Mutating the backing list and the AnimatedList out of step desynchronizes indices and throws RangeError or animates the wrong row.
+    fix: Keep them in lockstep — for inserts call list.insert then insertItem with the same index; for removes call removeItem first (with the captured item) then list.removeAt.
+    source: community-consensus
+    confidence: community-consensus
+  - claim: initialItemCount that differs from the backing list length leaves the list rendering too few or too many rows on first build.
+    fix: "Set initialItemCount: _items.length so AnimatedList and the data start in agreement."
+    source: https://api.flutter.dev/flutter/widgets/AnimatedList/initialItemCount.html
+    confidence: official-docs

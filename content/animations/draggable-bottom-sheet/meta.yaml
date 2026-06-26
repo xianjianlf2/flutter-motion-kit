@@ -1,0 +1,33 @@
+id: draggable-bottom-sheet
+title: Draggable bottom sheet
+category: explicit
+difficulty: 3
+tags: [bottom-sheet, DraggableScrollableSheet, scroll, snap, gesture]
+summary: >
+  A bottom sheet the user can drag between heights and then scroll its contents.
+  DraggableScrollableSheet hands the builder a ScrollController that composes the
+  drag and the inner scroll so the hand-off feels seamless. Adds snap points.
+verifiedOn: "Flutter 3.32 / 2026-06"
+gistId: ""
+docs:
+  - https://api.flutter.dev/flutter/widgets/DraggableScrollableSheet-class.html
+  - https://api.flutter.dev/flutter/widgets/DraggableScrollableSheet/snap.html
+  - https://api.flutter.dev/flutter/widgets/DraggableScrollableSheet/snapSizes.html
+  - https://api.flutter.dev/flutter/widgets/ScrollController-class.html
+pitfalls:
+  - claim: The inner scrollable must use the ScrollController the builder hands you; using your own controller breaks the drag-to-expand-then-scroll hand-off.
+    fix: Pass the builder's scrollController straight into the ListView/CustomScrollView controller parameter.
+    source: https://api.flutter.dev/flutter/widgets/DraggableScrollableSheet-class.html
+    confidence: official-docs
+  - claim: initialChildSize must lie within [minChildSize, maxChildSize] or the widget fails an assertion at build time.
+    fix: Keep the three fractions ordered, e.g. min 0.25 <= initial 0.4 <= max 0.9.
+    source: https://api.flutter.dev/flutter/widgets/DraggableScrollableSheet/initialChildSize.html
+    confidence: official-docs
+  - claim: Without snap the sheet rests at whatever height the finger leaves it, which feels imprecise for a few discrete stops.
+    fix: Set snap:true and list snapSizes (each must be within [min,max]) to snap between defined heights.
+    source: https://api.flutter.dev/flutter/widgets/DraggableScrollableSheet/snap.html
+    confidence: official-docs
+  - claim: With expand:true the sheet sizes to its parent, so it needs a bounded ancestor such as a Stack to overlay the page from the bottom.
+    fix: Put the DraggableScrollableSheet inside a Stack (or the Scaffold body) so it fills and aligns to the bottom.
+    source: https://api.flutter.dev/flutter/widgets/DraggableScrollableSheet/expand.html
+    confidence: official-docs

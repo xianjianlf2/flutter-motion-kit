@@ -1,0 +1,33 @@
+id: spring-physics-drag
+title: Spring drag & release
+category: physics
+difficulty: 4
+tags: [physics, spring, drag, SpringSimulation, animateWith, gesture]
+summary: >
+  Drag a box and release it; it springs back to center with a SpringSimulation
+  fed to animateWith. The release (pan) velocity becomes the simulation's
+  initial velocity, so the motion continues naturally from the gesture.
+verifiedOn: "Flutter 3.32 / 2026-06"
+gistId: ""
+docs:
+  - https://api.flutter.dev/flutter/animation/AnimationController/animateWith.html
+  - https://api.flutter.dev/flutter/physics/SpringSimulation-class.html
+  - https://api.flutter.dev/flutter/physics/SpringDescription-class.html
+  - https://docs.flutter.dev/cookbook/animation/physics-simulation
+pitfalls:
+  - claim: animateWith runs the supplied Simulation, so AnimationController.duration is ignored — setting it does nothing.
+    fix: Drop controller.duration when using animateWith; let the SpringSimulation decide when motion settles.
+    source: https://api.flutter.dev/flutter/animation/AnimationController/animateWith.html
+    confidence: official-docs
+  - claim: The damping ratio is damping/(2*sqrt(mass*stiffness)); below ~1 it is underdamped (bouncy), and very low values look broken.
+    fix: Aim for a ratio around 0.4–0.8; tune mass/stiffness/damping together rather than one in isolation.
+    source: https://api.flutter.dev/flutter/physics/SpringDescription-class.html
+    confidence: official-docs
+  - claim: Forgetting controller.dispose() leaks the Ticker held by the AnimationController.
+    fix: Call _controller.dispose() in State.dispose(); use SingleTickerProviderStateMixin for a single controller.
+    source: https://api.flutter.dev/flutter/widgets/SingleTickerProviderStateMixin-mixin.html
+    confidence: official-docs
+  - claim: A fixed-duration CurvedAnimation Tween throws away the release velocity, so the spring-back feels disconnected from the gesture.
+    fix: Feed the pan velocity into SpringSimulation's velocity argument and drive the controller with animateWith.
+    source: https://docs.flutter.dev/cookbook/animation/physics-simulation
+    confidence: community-consensus

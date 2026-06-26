@@ -1,0 +1,32 @@
+id: expand-collapse-size
+title: Expand / collapse (AnimatedSize)
+category: implicit
+difficulty: 2
+tags: [implicit, AnimatedSize, expand, collapse, panel]
+summary: >
+  A tappable header expands and collapses a body whose height is unknown. Pure
+  implicit animation: AnimatedSize tweens to whatever intrinsic size its child
+  reports — no manual controller, no measuring.
+verifiedOn: "Flutter 3.32 / 2026-06"
+gistId: ""
+docs:
+  - https://api.flutter.dev/flutter/widgets/AnimatedSize-class.html
+  - https://docs.flutter.dev/ui/animations/implicit-animations
+  - https://api.flutter.dev/flutter/widgets/SizeTransition-class.html
+pitfalls:
+  - claim: AnimatedSize clips its child while resizing; if the inner child is unbounded it can overflow mid-animation.
+    fix: Give the body a bounded or intrinsic size (let it size to its content) so it never fights AnimatedSize's clip.
+    source: https://api.flutter.dev/flutter/widgets/AnimatedSize-class.html
+    confidence: official-docs
+  - claim: Since Flutter 2.x AnimatedSize no longer takes a vsync argument; tutorials that still pass it won't compile.
+    fix: Drop the vsync parameter entirely — AnimatedSize gets its ticker from the build context.
+    source: https://api.flutter.dev/flutter/widgets/AnimatedSize-class.html
+    confidence: official-docs
+  - claim: With no duration/curve (or a zero duration) the size snaps instantly and there is no visible animation.
+    fix: Supply a non-zero duration and a curve; use alignment to choose which edge stays anchored while resizing.
+    source: https://api.flutter.dev/flutter/widgets/AnimatedSize/alignment.html
+    confidence: official-docs
+  - claim: Hand-rolling a SizeTransition forces you to know the target height up front, which fails for intrinsic content.
+    fix: Prefer AnimatedSize when the end size is intrinsic or unknown; reach for SizeTransition only with a fixed factor.
+    source: community-consensus
+    confidence: community-consensus

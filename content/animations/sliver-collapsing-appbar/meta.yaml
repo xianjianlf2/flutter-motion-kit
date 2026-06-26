@@ -1,0 +1,33 @@
+id: sliver-collapsing-appbar
+title: Collapsing SliverAppBar (parallax)
+category: explicit
+difficulty: 3
+tags: [sliver, SliverAppBar, FlexibleSpaceBar, CustomScrollView, parallax, scroll]
+summary: >
+  A scroll-driven collapsing header: a SliverAppBar with expandedHeight and a
+  FlexibleSpaceBar whose background parallaxes while the bar shrinks to a pinned
+  toolbar. No AnimationController — the scroll offset is the driver.
+verifiedOn: "Flutter 3.32 / 2026-06"
+gistId: ""
+docs:
+  - https://api.flutter.dev/flutter/material/SliverAppBar-class.html
+  - https://api.flutter.dev/flutter/material/FlexibleSpaceBar-class.html
+  - https://api.flutter.dev/flutter/widgets/CustomScrollView-class.html
+  - https://api.flutter.dev/flutter/rendering/SliverList-class.html
+pitfalls:
+  - claim: A SliverAppBar is a sliver and only works inside a viewport that speaks the sliver protocol; dropping it in a Column or a box-based ListView throws or fails to render.
+    fix: Put SliverAppBar inside a CustomScrollView's slivers list (or a NestedScrollView headerSliverBuilder).
+    source: https://api.flutter.dev/flutter/material/SliverAppBar-class.html
+    confidence: official-docs
+  - claim: Without pinned (or floating/snap) the app bar scrolls completely off-screen and never returns until you scroll back to the top.
+    fix: Choose the behavior deliberately — set pinned:true to keep a collapsed toolbar visible, floating:true to bring it back on any upward scroll.
+    source: https://api.flutter.dev/flutter/material/SliverAppBar/pinned.html
+    confidence: official-docs
+  - claim: If expandedHeight is too small the FlexibleSpaceBar title overlaps the background and the collapse looks cramped or janky.
+    fix: Give expandedHeight enough room (e.g. ~240) and use CollapseMode.parallax so the background moves slower than the foreground.
+    source: https://api.flutter.dev/flutter/material/FlexibleSpaceBar/collapseMode.html
+    confidence: official-docs
+  - claim: Nesting a regular ListView for the body inside the CustomScrollView gives an unbounded-height error or a second, conflicting scroll view.
+    fix: Use a SliverList with SliverChildBuilderDelegate (or SliverToBoxAdapter) so the body shares the single CustomScrollView scroll.
+    source: https://api.flutter.dev/flutter/rendering/SliverList-class.html
+    confidence: official-docs

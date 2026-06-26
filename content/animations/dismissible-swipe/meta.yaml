@@ -1,0 +1,33 @@
+id: dismissible-swipe
+title: Swipe to dismiss
+category: explicit
+difficulty: 2
+tags: [list, Dismissible, swipe, gesture, background]
+summary: >
+  A ListView of rows wrapped in Dismissible. Swipe a row to fling it off-screen
+  over a colored background; onDismissed removes the item from the data source so
+  the list and the widget tree stay consistent.
+verifiedOn: "Flutter 3.32 / 2026-06"
+gistId: ""
+docs:
+  - https://api.flutter.dev/flutter/widgets/Dismissible-class.html
+  - https://api.flutter.dev/flutter/widgets/Dismissible/onDismissed.html
+  - https://api.flutter.dev/flutter/widgets/Dismissible/confirmDismiss.html
+  - https://api.flutter.dev/flutter/widgets/Dismissible/background.html
+pitfalls:
+  - claim: Dismissible needs a stable, unique Key per item; without one Flutter cannot tell which child left and dismisses or rebuilds the wrong row.
+    fix: Give each Dismissible a ValueKey derived from the item's identity (e.g. ValueKey(item)), not the list index.
+    source: https://api.flutter.dev/flutter/widgets/Dismissible-class.html
+    confidence: official-docs
+  - claim: If onDismissed does not remove the item from the data source, the widget stays in the tree and Flutter throws "A dismissed Dismissible widget is still part of the tree".
+    fix: In onDismissed call setState and remove the backing item so the next build no longer produces that Dismissible.
+    source: https://api.flutter.dev/flutter/widgets/Dismissible-class.html
+    confidence: official-docs
+  - claim: Removing immediately on swipe gives no chance to cancel a destructive action.
+    fix: Return a Future<bool> from confirmDismiss (e.g. an AlertDialog) and only let the dismiss proceed when it resolves true.
+    source: https://api.flutter.dev/flutter/widgets/Dismissible/confirmDismiss.html
+    confidence: official-docs
+  - claim: A Dismissible with no background reveals nothing under the finger, and a direction without a matching background looks broken.
+    fix: Supply background (and secondaryBackground for the opposite direction) aligned with the icons that hint the allowed swipe direction.
+    source: https://api.flutter.dev/flutter/widgets/Dismissible/background.html
+    confidence: official-docs

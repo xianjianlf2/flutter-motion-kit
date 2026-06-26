@@ -1,0 +1,33 @@
+id: custom-painter-progress-ring
+title: CustomPainter progress ring
+category: custom-painter
+difficulty: 4
+tags: [custom-painter, progress, ring, drawArc, repaint, canvas]
+summary: >
+  A circular progress ring whose arc sweeps from 0 to full, driven by an
+  AnimationController passed to CustomPainter's super(repaint:) so it repaints
+  off the animation rather than off parent rebuilds. The Paint is cached.
+verifiedOn: "Flutter 3.32 / 2026-06"
+gistId: ""
+docs:
+  - https://api.flutter.dev/flutter/rendering/CustomPainter/repaint.html
+  - https://api.flutter.dev/flutter/rendering/CustomPainter/shouldRepaint.html
+  - https://api.flutter.dev/flutter/dart-ui/Canvas/drawArc.html
+  - https://api.flutter.dev/flutter/dart-ui/Paint-class.html
+pitfalls:
+  - claim: Passing the animation to super(repaint:) and returning false from shouldRepaint repaints on ticks only; returning true repaints on every parent rebuild and wastes CPU.
+    fix: "Wire the Listenable via super(repaint: animation) and return false from shouldRepaint when no config changed."
+    source: https://api.flutter.dev/flutter/rendering/CustomPainter/repaint.html
+    confidence: official-docs
+  - claim: Allocating a new Paint inside paint() runs at up to 60fps and creates GC churn.
+    fix: Cache the Paint as a final field and mutate it (e.g. paint.color) instead of constructing it per frame.
+    source: https://api.flutter.dev/flutter/dart-ui/Paint-class.html
+    confidence: community-consensus
+  - claim: Canvas.drawArc measures startAngle from 3 o'clock and, with useCenter true, draws a filled pie wedge.
+    fix: Offset the start angle by -pi/2 for a 12 o'clock start and pass useCenter:false to stroke an open ring.
+    source: https://api.flutter.dev/flutter/dart-ui/Canvas/drawArc.html
+    confidence: official-docs
+  - claim: Default flat stroke caps leave hard, aliased arc ends that look unfinished.
+    fix: Set Paint.strokeCap = StrokeCap.round and isAntiAlias = true for smooth, rounded arc ends.
+    source: https://api.flutter.dev/flutter/dart-ui/Paint/strokeCap.html
+    confidence: official-docs
