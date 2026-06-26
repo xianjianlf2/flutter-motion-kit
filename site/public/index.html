@@ -618,25 +618,28 @@ return AnimatedBuilder(
           ),
           // Install button group
           React.createElement('div', { style: { display: 'flex', gap: 10, marginTop: 26, flexWrap: 'wrap', alignItems: 'center' } },
-            ['AI Assistant', 'Cursor', 'VS Code'].map((label, i) =>
-              React.createElement('button', {
-                key: label,
-                onClick: () => this.copyText(`flutter_motion_kit://install?target=${label.toLowerCase().replace(' ', '-')}`, `Install link copied for ${label}`),
-                style: {
-                  background: i === 0 ? '#4dd0e1' : '#161b22',
-                  color: i === 0 ? '#0d1117' : '#e6edf3',
-                  border: i === 0 ? 'none' : '1px solid #30363d',
-                  padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                  cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8,
-                  transition: 'transform 0.12s, background 0.12s',
-                },
-                'onMouseEnter': (e) => { e.currentTarget.style.transform = 'translateY(-1px)'; },
-                'onMouseLeave': (e) => { e.currentTarget.style.transform = 'translateY(0)'; },
-              },
-                React.createElement('span', null, '＋'),
-                React.createElement('span', null, `Add to ${label}`)
-              )
-            ),
+            (() => {
+              const MCP = 'https://mcp.markxian.cn/mcp';
+              const cfg = JSON.stringify({ url: MCP });
+              const btn = (primary) => ({
+                background: primary ? '#4dd0e1' : '#161b22',
+                color: primary ? '#0d1117' : '#e6edf3',
+                border: primary ? 'none' : '1px solid #30363d',
+                padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none',
+              });
+              return [
+                React.createElement('a', {
+                  key: 'cursor', href: 'cursor://anysphere.cursor-deeplink/mcp/install?name=flutter-motion&config=' + btoa(cfg), style: btn(true),
+                }, React.createElement('span', null, '＋'), React.createElement('span', null, 'Add to Cursor')),
+                React.createElement('a', {
+                  key: 'vscode', href: 'https://insiders.vscode.dev/redirect/mcp/install?name=flutter-motion&config=' + encodeURIComponent(cfg), style: btn(false),
+                }, React.createElement('span', null, '＋'), React.createElement('span', null, 'Add to VS Code')),
+                React.createElement('button', {
+                  key: 'cc', onClick: () => this.copyText('claude mcp add --transport http flutter-motion ' + MCP, 'Claude Code command copied'), style: btn(false),
+                }, React.createElement('span', { className: 'mono' }, '$'), React.createElement('span', null, 'Copy Claude Code command')),
+              ];
+            })(),
             // Live developers connected badge
             React.createElement('div', { className: 'mono', style: {
               marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -777,10 +780,27 @@ return AnimatedBuilder(
             ),
             React.createElement('button', {
               onClick: () => {
+                const params = entry.params.map(p => `${p.label} = ${this.formatParam(entry, p.key, vals[p.key])}${p.unit ? ' ' + p.unit : ''}`).join(', ');
                 const code = this.dartFinalCode(entry, vals);
                 const pf = entry.pitfalls.map(p => `- ${p.claim}\n  fix: ${p.fix}\n  source (${p.confidence}): ${p.source}`).join('\n');
-                const payload = `// ${entry.title} — verified ${entry.verifiedOn}\n\n${code}\n\n/* Pitfalls\n${pf}\n*/`;
-                this.copyText(payload, 'Copied code + pitfalls for AI');
+                const payload =
+`I want exactly this Flutter animation effect: ${entry.title} (${entry.category}).
+Tuned parameters: ${params}.
+
+Implement it in my project using the reference below, and you MUST follow every pitfall.
+For the verified, lint-passing implementation prefer the flutter-motion MCP
+(search_flutter_animation for a "${entry.category}" animation, then get_animation),
+or see https://motion.markxian.cn/gallery .
+
+\`\`\`dart
+${code}
+\`\`\`
+
+Pitfalls (do not violate):
+${pf}
+
+(verified ${entry.verifiedOn})`;
+                this.copyText(payload, 'Copied — paste into your AI assistant');
               },
               style: {
                 background: '#4dd0e1', color: '#0d1117', border: 'none',
