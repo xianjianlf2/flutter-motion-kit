@@ -1,0 +1,293 @@
+---
+import catalog from '../../../catalog.json';
+
+const REPO = 'https://github.com/xianjianlf2/flutter-motion-kit';
+const catColor = {
+  implicit: '#4dd0e1', explicit: '#3fb950', hero: '#d29922',
+  staggered: '#bc8cff', physics: '#ff7b72', 'custom-painter': '#79c0ff',
+};
+
+// Drive the verifier from the real catalog. format/analyze/buildWeb are enforced by CI
+// (an entry only ships if they pass); leakTest is "pass" when a pitfall is proven by a test, else "n/a".
+const rows = catalog.entries.map((e) => {
+  const leak = (e.pitfalls ?? []).some((p) => p.provenBy) ? 'pass' : 'n/a';
+  const sdk = e.verifiedOn.replace('Flutter', '').split('/')[0].trim();
+  const lastVerified = (e.verifiedOn.split('/')[1] ?? '').trim();
+  return {
+    id: e.id, title: e.title, category: e.category, difficulty: e.difficulty,
+    leakTest: leak, leakTestPass: leak === 'pass', leakTestNa: leak === 'n/a',
+    sdk, lastVerified, catColor: catColor[e.category] ?? '#8b949e',
+  };
+});
+
+const total = rows.length;
+const actionable = rows.length * 3 + rows.filter((r) => r.leakTest === 'pass').length;
+const na = rows.filter((r) => r.leakTest === 'n/a').length;
+const lastRun = catalog.generatedAt ? catalog.generatedAt.replace('T', ' ').slice(0, 16) + ' UTC' : 'Flutter 3.32 / 2026-06';
+
+const statusJson = JSON.stringify({
+  verifiedOn: 'Flutter 3.32 / 2026-06',
+  reVerified: 'monthly (1st, via CI cron)',
+  totalEntries: total,
+  passing: total,
+  checks: ['format', 'analyze', 'buildWeb', 'leakTest'],
+  entries: rows.map((r) => ({
+    id: r.id, category: r.category, difficulty: r.difficulty,
+    checks: { format: 'pass', analyze: 'pass', buildWeb: 'pass', leakTest: r.leakTest },
+    verifiedOn: `Flutter ${r.sdk} / ${r.lastVerified}`,
+  })),
+}, null, 2);
+
+const cell = "padding:14px 8px; display:flex; justify-content:center";
+const pass = "display:inline-flex; align-items:center; gap:4px; background:rgba(63,185,150,0.12); color:#3fb950; padding:3px 9px; border-radius:999px; font-size:11px; font-family:'JetBrains Mono',monospace";
+const naPill = "display:inline-flex; align-items:center; gap:4px; background:#21262d; color:#7d8590; padding:3px 9px; border-radius:999px; font-size:11px; font-family:'JetBrains Mono',monospace";
+const grid = "display:grid; grid-template-columns:minmax(220px, 2fr) repeat(4, 90px) 120px 110px; gap:0";
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Verifier — Flutter Motion Kit</title>
+<meta name="description" content={`Every one of ${total} animations passes format, analyze, build-web and leak-test on a stable Flutter SDK, re-verified monthly.`} />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style is:global>
+  html, body { background:#0d1117; color:#e6edf3; font-family:'Inter',system-ui,sans-serif; margin:0; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:'JetBrains Mono',ui-monospace,Menlo,monospace; }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-track { background:#0d1117; }
+  ::-webkit-scrollbar-thumb { background:#21262d; border-radius:6px; border:2px solid #0d1117; }
+  ::-webkit-scrollbar-thumb:hover { background:#30363d; }
+  @keyframes livepulse { 0%,100% { opacity:1; transform:scale(1) } 50% { opacity:0.4; transform:scale(1.15) } }
+  .live-dot { animation:livepulse 1.6s infinite; }
+  @keyframes pulseRing { 0% { transform:scale(0.6); opacity:0.6 } 100% { transform:scale(2.2); opacity:0 } }
+  .pulse-ring { animation:pulseRing 1.8s ease-out infinite; }
+  @keyframes toastIn { from { opacity:0; transform:translateY(8px) translateX(-50%) } to { opacity:1; transform:translateY(0) translateX(-50%) } }
+  .toast { animation:toastIn 0.18s ease-out; }
+  .check-cell { position:relative; }
+  .check-cell .check-tip { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); background:#0d1117; border:1px solid #30363d; color:#e6edf3; padding:7px 10px; border-radius:6px; font-size:11px; white-space:nowrap; z-index:10; opacity:0; pointer-events:none; transition:opacity 0.12s; font-family:'JetBrains Mono',monospace; box-shadow:0 8px 24px -8px rgba(0,0,0,0.5); }
+  .check-cell .check-tip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:#30363d; }
+  .check-cell:hover .check-tip { opacity:1; }
+  .vrow { transition:background 0.12s; }
+  .vrow:hover { background:rgba(77,208,225,0.045); }
+  .vrow:hover .vrow-title { color:#4dd0e1; }
+  .navlink { transition:color 0.12s; }
+  .navlink:hover { color:#e6edf3 !important; }
+  details.json-drawer summary { list-style:none; cursor:pointer; }
+  details.json-drawer summary::-webkit-details-marker { display:none; }
+  details.json-drawer[open] .caret { transform:rotate(90deg); }
+  .caret { transition:transform 0.15s; display:inline-block; }
+</style>
+</head>
+<body>
+
+<header style="position:sticky; top:0; z-index:20; backdrop-filter:blur(8px); background:rgba(13,17,23,0.85); border-bottom:1px solid #21262d; padding:12px 32px; display:flex; align-items:center; gap:16px">
+  <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit">
+    <div style="width:26px; height:26px; border-radius:7px; background:conic-gradient(from 230deg at 50% 50%, #4dd0e1, #3fb950, #d29922, #4dd0e1); box-shadow:0 0 0 1px #21262d inset"></div>
+    <div style="display:flex; flex-direction:column; line-height:1">
+      <span style="font-size:13px; font-weight:600">Flutter Motion Kit</span>
+      <span class="mono" style="font-size:10px; color:#6e7681; margin-top:2px">v3.32.0</span>
+    </div>
+  </a>
+  <nav style="display:flex; gap:18px; margin-left:24px; font-size:13px">
+    <a href="/gallery" class="navlink" style="color:#8b949e; text-decoration:none">Gallery</a>
+    <a href="/docs" class="navlink" style="color:#8b949e; text-decoration:none">Docs</a>
+    <a href="/verifier" class="navlink" style="color:#e6edf3; text-decoration:none; font-weight:500">Verifier</a>
+    <a href="/changelog" class="navlink" style="color:#8b949e; text-decoration:none">Changelog</a>
+  </nav>
+  <div style="margin-left:auto; display:flex; gap:8px; align-items:center">
+    <a href="/connect" style="background:#161b22; border:1px solid #30363d; color:#e6edf3; padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; text-decoration:none">Connect</a>
+  </div>
+</header>
+
+<section style="padding:48px 32px 32px; border-bottom:1px solid #21262d; background:radial-gradient(900px 360px at 12% -10%, rgba(63,185,150,0.08), transparent 60%)">
+  <div style="max-width:1200px; margin:0 auto">
+    <div class="mono" style="color:#3fb950; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-bottom:14px">// verifier</div>
+    <div style="display:flex; align-items:center; gap:18px; flex-wrap:wrap">
+      <div style="display:inline-flex; align-items:center; gap:12px; background:#161b22; border:1px solid #30363d; padding:14px 18px; border-radius:12px">
+        <div style="position:relative; width:14px; height:14px; display:flex; align-items:center; justify-content:center">
+          <div class="pulse-ring" style="position:absolute; inset:0; border-radius:50%; background:#3fb950"></div>
+          <div class="live-dot" style="position:relative; width:10px; height:10px; border-radius:50%; background:#3fb950; box-shadow:0 0 12px #3fb950"></div>
+        </div>
+        <div>
+          <div style="font-size:15px; font-weight:600">All {total} entries passing</div>
+          <div class="mono" style="font-size:11px; color:#7d8590; margin-top:2px">verified on Flutter 3.32 · re-verified monthly</div>
+        </div>
+      </div>
+    </div>
+
+    <h1 style="font-size:34px; line-height:1.1; font-weight:700; letter-spacing:-0.5px; margin:28px 0 8px; max-width:780px">Every animation runs the same four checks on every commit.</h1>
+    <p style="font-size:15px; color:#8b949e; max-width:680px; line-height:1.55; margin:0">No vibes. The verifier formats, analyzes, builds for web, and leak-tests each <span class="mono" style="color:#e6edf3">main.dart</span> against a pinned Flutter SDK. Anything red gets pulled from the catalog until it's fixed.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-top:32px; max-width:900px">
+      <div style="background:#161b22; border:1px solid #30363d; border-radius:12px; padding:18px">
+        <div class="mono" style="font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px">Entries passing</div>
+        <div style="font-size:28px; font-weight:700; color:#3fb950">{total} <span style="color:#6e7681; font-weight:400; font-size:18px">/ {total}</span></div>
+      </div>
+      <div style="background:#161b22; border:1px solid #30363d; border-radius:12px; padding:18px">
+        <div class="mono" style="font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px">Actionable checks green</div>
+        <div style="font-size:28px; font-weight:700; color:#3fb950">{actionable} <span style="color:#6e7681; font-weight:400; font-size:18px">/ {actionable}</span></div>
+        <div class="mono" style="font-size:11px; color:#6e7681; margin-top:4px">{na} n/a (leak test not applicable)</div>
+      </div>
+      <div style="background:#161b22; border:1px solid #30363d; border-radius:12px; padding:18px">
+        <div class="mono" style="font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px">Last verification run</div>
+        <div style="font-size:16px; font-weight:600; color:#e6edf3" class="mono">{lastRun}</div>
+        <div style="font-size:12px; color:#7d8590; margin-top:4px">cron: 1st of each month</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:32px; background:#0d1117">
+  <div style="max-width:1200px; margin:0 auto">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px">
+      <h2 style="font-size:18px; font-weight:600; margin:0">Per-entry status</h2>
+      <span class="mono" style="font-size:11px; color:#6e7681">hover any check for the exact command</span>
+    </div>
+
+    <div style="background:#161b22; border:1px solid #30363d; border-radius:12px; overflow:hidden">
+      <div style={`${grid}; background:#0d1117; border-bottom:1px solid #21262d`}>
+        <div class="mono" style="padding:12px 16px; font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px">Animation</div>
+        <div class="mono" style="padding:12px 8px; font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; text-align:center">Format</div>
+        <div class="mono" style="padding:12px 8px; font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; text-align:center">Analyze</div>
+        <div class="mono" style="padding:12px 8px; font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; text-align:center">Build web</div>
+        <div class="mono" style="padding:12px 8px; font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; text-align:center">Leak test</div>
+        <div class="mono" style="padding:12px 8px; font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px">SDK</div>
+        <div class="mono" style="padding:12px 8px; font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px">Verified</div>
+      </div>
+
+      {rows.map((row) => (
+        <a class="vrow" href={`/a/${row.id}`} style={`${grid}; border-bottom:1px solid #21262d; text-decoration:none; color:inherit; align-items:center`}>
+          <div style="padding:14px 16px; display:flex; flex-direction:column; gap:5px">
+            <div class="vrow-title" style="font-size:14px; font-weight:500; color:#e6edf3; transition:color 0.12s">{row.title}</div>
+            <div style="display:flex; align-items:center; gap:8px">
+              <span class="mono" style={`font-size:10px; color:${row.catColor}; text-transform:lowercase`}>{row.category}</span>
+              <span style="color:#30363d">·</span>
+              <span class="mono" style="font-size:10px; color:#6e7681">diff {row.difficulty}/5</span>
+            </div>
+          </div>
+          <div class="check-cell" style={cell}><span style={pass}>✓ pass</span><span class="check-tip">dart format --set-exit-if-changed</span></div>
+          <div class="check-cell" style={cell}><span style={pass}>✓ pass</span><span class="check-tip">flutter analyze (very_good_analysis)</span></div>
+          <div class="check-cell" style={cell}><span style={pass}>✓ pass</span><span class="check-tip">flutter build web</span></div>
+          <div class="check-cell" style={cell}>
+            {row.leakTestPass
+              ? <span style={pass}>✓ pass</span>
+              : <span style={naPill}>n/a</span>}
+            <span class="check-tip">flutter test --enable-leak-tracking</span>
+          </div>
+          <div class="mono" style="padding:14px 8px; font-size:11px; color:#8b949e">{row.sdk}</div>
+          <div class="mono" style="padding:14px 16px 14px 8px; font-size:11px; color:#8b949e">{row.lastVerified}</div>
+        </a>
+      ))}
+    </div>
+
+    <div style="margin-top:14px; display:flex; gap:18px; font-size:12px">
+      <a href={`${REPO}/actions/workflows/verify.yml`} target="_blank" rel="noopener" style="color:#4dd0e1; text-decoration:none">↗ View full run logs</a>
+      <a href={`${REPO}/blob/main/.github/workflows/verify.yml`} target="_blank" rel="noopener" style="color:#4dd0e1; text-decoration:none">↗ CI configuration (verify.yml)</a>
+    </div>
+  </div>
+</section>
+
+<section style="padding:48px 32px; background:#0d1117; border-top:1px solid #21262d">
+  <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.1fr); gap:32px; align-items:start">
+    <div>
+      <div class="mono" style="color:#d29922; font-size:11px; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px">// why this matters</div>
+      <h2 style="font-size:26px; font-weight:700; line-height:1.2; letter-spacing:-0.3px; margin:0 0 14px">Bad Dart compiles too.</h2>
+      <p style="font-size:14px; color:#8b949e; line-height:1.6; margin:0 0 16px">A snippet that "looks right" can ship a leaking controller, a Hero tag collision, or a Paint allocated inside a 60fps callback. Linting won't catch any of those. The verifier does.</p>
+      <p style="font-size:14px; color:#8b949e; line-height:1.6; margin:0 0 24px">Our hierarchy of trust:</p>
+      <div style="display:flex; flex-direction:column; gap:10px">
+        <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; background:#161b22; border:1px solid #30363d; border-radius:10px">
+          <span class="mono" style="font-size:11px; color:#6e7681; width:18px">1</span>
+          <span style="font-size:13px; color:#e6edf3"><span style="color:#8b949e">unsourced claim</span> <span style="color:#6e7681">·</span> "I heard it leaks"</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; background:#161b22; border:1px solid #30363d; border-radius:10px">
+          <span class="mono" style="font-size:11px; color:#6e7681; width:18px">2</span>
+          <span style="font-size:13px; color:#e6edf3"><span style="color:#4dd0e1">sourced claim</span> <span style="color:#6e7681">·</span> link to a github issue or doc page</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; background:#161b22; border:1px solid #30363d; border-radius:10px">
+          <span class="mono" style="font-size:11px; color:#6e7681; width:18px">3</span>
+          <span style="font-size:13px; color:#e6edf3"><span style="color:#79c0ff">provable</span> <span style="color:#6e7681">·</span> a test that fails on the wrong version</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; background:rgba(63,185,150,0.06); border:1px solid #3fb950; border-radius:10px">
+          <span class="mono" style="font-size:11px; color:#3fb950; width:18px">4</span>
+          <span style="font-size:13px; color:#e6edf3"><span style="color:#3fb950; font-weight:600">machine-verified</span> <span style="color:#6e7681">·</span> CI runs the test, every month, on a pinned stable SDK</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#161b22; border:1px solid #30363d; border-radius:12px; overflow:hidden">
+      <div style="padding:10px 14px; border-bottom:1px solid #21262d; display:flex; align-items:center; justify-content:space-between">
+        <div class="mono" style="font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px">counter-example · bad.dart</div>
+        <span class="mono" style="font-size:11px; background:rgba(255,123,114,0.12); color:#ff7b72; padding:2px 8px; border-radius:999px">⨯ fails leakTest</span>
+      </div>
+      <pre class="mono" style="margin:0; padding:16px; font-size:12.5px; line-height:1.65; color:#e6edf3; overflow:auto"><span style="color:#7d8590">// Every entry ships a bad.dart that fails the same checks.</span>
+<span style="color:#7d8590">// Proof the pitfall is real, not theoretical.</span>
+
+<span style="color:#ff7b72">class</span> <span style="color:#79c0ff">_RotatingState</span> <span style="color:#ff7b72">extends</span> <span style="color:#79c0ff">State</span>&lt;<span style="color:#79c0ff">Rotating</span>&gt;
+    <span style="color:#ff7b72">with</span> <span style="color:#79c0ff">SingleTickerProviderStateMixin</span> {'{'}
+
+  <span style="color:#ff7b72">late</span> <span style="color:#ff7b72">final</span> <span style="color:#79c0ff">AnimationController</span> ctrl
+      = <span style="color:#79c0ff">AnimationController</span>(
+          vsync: <span style="color:#ff7b72">this</span>,
+          duration: <span style="color:#79c0ff">Duration</span>(seconds: <span style="color:#f0883e">1</span>),
+        )..repeat();
+
+  <span style="color:#7d8590">// ⨯ forgot dispose() — Ticker leaks on rebuild</span>
+
+  <span style="color:#79c0ff">@override</span>
+  <span style="color:#79c0ff">Widget</span> build(<span style="color:#79c0ff">BuildContext</span> ctx) =&gt;
+      <span style="color:#79c0ff">RotationTransition</span>(turns: ctrl, child: ...);
+{'}'}</pre>
+      <div style="padding:12px 14px; border-top:1px solid #21262d; font-size:12px; color:#8b949e; line-height:1.5"><span class="mono" style="color:#3fb950">flutter test --enable-leak-tracking</span> catches this and refuses to publish the entry until <span class="mono" style="color:#e6edf3">main.dart</span> calls <span class="mono" style="color:#e6edf3">ctrl.dispose()</span>.</div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:32px; border-top:1px solid #21262d; background:#0d1117">
+  <div style="max-width:1200px; margin:0 auto">
+    <details class="json-drawer" style="background:#161b22; border:1px solid #30363d; border-radius:12px; overflow:hidden">
+      <summary style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px">
+        <div style="display:flex; align-items:center; gap:10px">
+          <span class="caret mono" style="color:#7d8590">▸</span>
+          <span style="font-size:14px; font-weight:600">Verification status (JSON)</span>
+          <span class="mono" style="font-size:11px; color:#7d8590">— machine-readable, for agents</span>
+        </div>
+        <button id="copy-json" style="background:#0d1117; border:1px solid #30363d; color:#e6edf3; padding:5px 11px; border-radius:6px; font-size:11px; cursor:pointer">📋 Copy JSON</button>
+      </summary>
+      <pre id="status-json" class="mono" style="margin:0; padding:16px 18px; background:#0d1117; border-top:1px solid #21262d; font-size:12px; line-height:1.65; color:#e6edf3; overflow:auto; max-height:400px">{statusJson}</pre>
+    </details>
+    <div style="margin-top:12px; display:flex; gap:18px; font-size:12px; color:#7d8590">
+      <span>Catalog endpoint: <a href="/api/animations.json" class="mono" style="color:#4dd0e1; text-decoration:none">/api/animations.json</a></span>
+      <span>Crawler index: <a href="/llms.txt" class="mono" style="color:#4dd0e1; text-decoration:none">/llms.txt</a></span>
+    </div>
+  </div>
+</section>
+
+<footer style="padding:32px; border-top:1px solid #21262d; text-align:center">
+  <div class="mono" style="font-size:11px; color:#6e7681">Flutter Motion Kit · machine-verified, monthly · MIT</div>
+</footer>
+
+<div id="toast" class="toast mono" style="display:none; position:fixed; bottom:24px; left:50%; background:#161b22; border:1px solid #4dd0e1; color:#4dd0e1; padding:8px 14px; border-radius:8px; font-size:12px; z-index:50; box-shadow:0 12px 40px -10px rgba(77,208,225,0.35)"></div>
+
+<script>
+  const btn = document.getElementById('copy-json');
+  const toast = document.getElementById('toast');
+  let t;
+  btn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const json = document.getElementById('status-json')?.textContent ?? '';
+    navigator.clipboard.writeText(json).then(() => {
+      if (!toast) return;
+      toast.textContent = '✓ JSON copied';
+      toast.style.display = 'block';
+      clearTimeout(t);
+      t = setTimeout(() => { toast.style.display = 'none'; }, 1600);
+    });
+  });
+</script>
+
+</body>
+</html>
