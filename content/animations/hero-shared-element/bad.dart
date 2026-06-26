@@ -1,5 +1,5 @@
-// ❌ 反面教材：所有项用同一个常量 tag。
-// 同屏出现多个相同 tag 的 Hero —— 运行时直接抛 "There are multiple heroes
+// ❌ Anti-pattern: every item uses the same constant tag.
+// Multiple Heroes with the same tag on screen at once — at runtime this throws "There are multiple heroes
 // that share the same tag within a subtree."
 import 'package:flutter/material.dart';
 
@@ -17,7 +17,8 @@ class _GridPage extends StatelessWidget {
         children: [
           for (final c in _colors)
             const Hero(
-              tag: 'box', // ❌ 所有项共用同一个 tag -> 同屏冲突崩溃
+              tag:
+                  'box', // ❌ every item shares one tag -> on-screen conflict crashes
               child: Placeholder(),
             ),
         ],

@@ -8,7 +8,7 @@ _verify/
 _preview/
 site/public/preview/
 
-# 部署私有配置（不进公开仓库）
+# Private deploy config (kept out of the public repo)
 worker/wrangler.toml
 worker/.dev.vars
 site/.env

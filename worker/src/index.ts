@@ -1,8 +1,8 @@
-// Flutter Motion Kit —— 远程 MCP (Cloudflare Worker)
-// 路由：
-//   POST /mcp     Streamable HTTP MCP（JSON 模式，无状态只读）
-//   GET  /stats   连接计数（供首页实时徽章）
-//   GET  /        服务信息 + 一键接入提示
+// Flutter Motion Kit — remote MCP (Cloudflare Worker)
+// Routes:
+//   POST /mcp     Streamable HTTP MCP (JSON mode, stateless and read-only)
+//   GET  /stats   connection count (for the homepage's live badge)
+//   GET  /        service info + one-line setup hint
 import catalog from '../../catalog.json';
 import { dispatch } from '../../mcp/dist/rpc.js';
 import type { Catalog } from '../../mcp/dist/tools.js';
@@ -27,7 +27,7 @@ const json = (data: unknown, init: ResponseInit = {}) =>
   });
 
 async function bumpConnections(env: Env) {
-  // 展示用的近似计数（KV 读改写，非强一致，对实时徽章足够）。
+  // Approximate count for display (KV read-modify-write, not strongly consistent, but good enough for a live badge).
   const n = Number((await env.STATS.get('connections')) ?? '0') + 1;
   await env.STATS.put('connections', String(n));
   return n;

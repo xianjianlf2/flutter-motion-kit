@@ -1,5 +1,5 @@
-// 最小 MCP JSON-RPC 调度器（Streamable HTTP 的 JSON 模式）。
-// 无状态、只读 —— 适合托管成远程 MCP。stdio 版仍用官方 SDK。
+// Minimal MCP JSON-RPC dispatcher (JSON mode for Streamable HTTP).
+// Stateless and read-only — well suited to hosting as a remote MCP. The stdio build still uses the official SDK.
 import { TOOL_DEFS, callTool, type Catalog } from './tools.js';
 
 const PROTOCOL_VERSION = '2024-11-05';
@@ -22,7 +22,7 @@ export function dispatch(catalog: Catalog, msg: JsonRpcReq): DispatchResult {
         serverInfo: { name: 'flutter-motion-kit', version: '0.1.0' },
       });
 
-    // 通知类无需回复
+    // Notifications need no reply
     case 'notifications/initialized':
     case 'notifications/cancelled':
       return { response: null, isInitialize: false };

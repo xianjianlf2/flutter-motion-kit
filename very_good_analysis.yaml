@@ -1,5 +1,5 @@
-# 严格 lint 基线（CI 会把它拷成被测工程的 analysis_options.yaml）。
-# 本地装 Flutter 后可直接用：flutter pub add --dev very_good_analysis
+# Strict lint baseline (CI copies it as the test project's analysis_options.yaml).
+# With Flutter installed locally you can also use: flutter pub add --dev very_good_analysis
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
@@ -7,7 +7,7 @@ analyzer:
     strict-casts: true
     strict-raw-types: true
   errors:
-    # 动画代码的高频隐患，提升为错误级，跑不过 CI 不允许收录
+    # Common hazards in animation code — promoted to errors; if CI fails them, the entry isn't included
     cancel_subscriptions: error
     close_sinks: error
     unawaited_futures: error

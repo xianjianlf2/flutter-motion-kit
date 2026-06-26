@@ -1,131 +1,131 @@
 # Flutter Motion Kit
 
-> 可**在线预览**的 Flutter 动画实现集合，每条都标注**对应的坑（含出处与可信度）**，并能让 **Claude Code / Cursor 一键复用**（MCP）。
+> A collection of **previewable** Flutter animations, each annotated with **its pitfalls (with sources and confidence)**, and reusable from **Claude Code / Cursor in one click** (MCP).
 
 [![developers connected](https://img.shields.io/badge/dynamic/json?url=https://mcp.markxian.cn/stats&query=$.connections&label=devs%20connected&color=brightgreen)](https://motion.markxian.cn)
 [![animations](https://img.shields.io/badge/dynamic/json?url=https://mcp.markxian.cn/stats&query=$.animations&label=animations&color=blue)](https://motion.markxian.cn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**🌐 在线预览：[motion.markxian.cn](https://motion.markxian.cn)**
+**🌐 Live: [motion.markxian.cn](https://motion.markxian.cn)** · **🎛 Interactive playground: [motion.markxian.cn/playground](https://motion.markxian.cn/playground/)**
 
-## 一键接入（远程 MCP · 零安装）
+## One-click connect (remote MCP · zero install)
 
-托管在 Cloudflare Worker，加一个 URL 即用，**内容更新即时生效**：
+Hosted on a Cloudflare Worker — add one URL and go, **content updates take effect instantly**:
 
 **Claude Code**
 ```bash
 claude mcp add --transport http flutter-motion https://mcp.markxian.cn/mcp
 ```
 
-**Cursor / VS Code**：点按钮一键导入
+**Cursor / VS Code** — import with one button:
 
 [![Add to Cursor](https://img.shields.io/badge/Add%20to-Cursor-000?logo=cursor)](cursor://anysphere.cursor-deeplink/mcp/install?name=flutter-motion&config=eyJ1cmwiOiJodHRwczovL21jcC5tYXJreGlhbi5jbi9tY3AifQ==)
 [![Add to VS Code](https://img.shields.io/badge/Add%20to-VS%20Code-007ACC?logo=visualstudiocode)](https://insiders.vscode.dev/redirect/mcp/install?name=flutter-motion&config=%7B%22url%22%3A%22https%3A%2F%2Fmcp.markxian.cn%2Fmcp%22%7D)
 
-> 离线/本地版（npx、无需托管）见下方 [本地开发版](#接入-claude-code一键复用)。
+> Prefer offline/local (npx, no hosting)? See [Connect Claude Code (local)](#connect-claude-code-one-click-reuse) below.
 
-一份结构化数据源，三个出口：
+One structured source, three outputs:
 
 ```
-content/animations/<id>/{meta.yaml, main.dart, bad.dart}   ← 唯一真相源
-        │  scripts/build-catalog.mjs（schema 校验 + 聚合）
+content/animations/<id>/{meta.yaml, main.dart, bad.dart}   ← single source of truth
+        │  scripts/build-catalog.mjs (schema validation + aggregation)
         ▼
    catalog.json
-   ├──▶ 站点(Astro)：真实运行的 Flutter web 预览（自托管）+ 代码 + 坑 + [复制给 AI] 按钮
-   └──▶ MCP server：search / get / list_pitfalls，供 AI 编码助手直接调用
+   ├──▶ Site (Astro): real running Flutter web previews (self-hosted) + code + pitfalls + [Copy for AI]
+   └──▶ MCP server: search / get / list_pitfalls, callable directly by AI coding assistants
 ```
 
-## 为什么不是又一个代码片段博客
+## Why this isn't just another snippet blog
 
-“最佳实践”不靠口述，靠**能证明 + 有出处 + 机器验证**：
+"Best practices" shouldn't rest on someone's word — they should be **provable + sourced + machine-verified**:
 
-- **每条坑带 `source` + `confidence`**（`official-docs` / `measured` / `author-experience` …）——诚实标注依据强度，MCP 返回时一并给 AI。
-- **CI 门禁**：每条 `main.dart` 必须过 `dart format` + `flutter analyze`（very_good_analysis）+ `flutter build web`，跑不过不允许收录。
-- **可复现**：每条都自托管一个**真实运行的 Flutter web 预览**（`npm run previews` 编译，非录屏）；`bad.dart` 演示错误写法可直接对比。
-- **防过时**：每条记 `verifiedOn`，CI 每月重跑发现 Flutter 新版的 deprecation。
+- **Every pitfall carries a `source` + `confidence`** (`official-docs` / `measured` / `author-experience` …) — an honest signal of how strong the basis is, returned to the AI alongside the code.
+- **CI gate**: every `main.dart` must pass `dart format` + `flutter analyze` (very_good_analysis) + `flutter build web`; if it doesn't, it isn't included.
+- **Reproducible**: every entry self-hosts a **real running Flutter web preview** (compiled by `npm run previews`, not a screen recording); `bad.dart` demonstrates the wrong way for side-by-side comparison.
+- **Anti-rot**: every entry records `verifiedOn`, and CI re-runs monthly to catch deprecations in new Flutter releases.
 
-## 快速开始
+## Quick start
 
 ```bash
 npm install
 
-# 1) 构建目录（校验 schema → catalog.json）
+# 1) Build the catalog (validate schema → catalog.json)
 npm run catalog
 
-# 2) 构建自托管预览（把每条 main.dart 编译成真能跑的 Flutter web）
-#    需本地有 Flutter（自动探测 fvm；产物在 site/public/preview/，已 gitignore）
+# 2) Build the self-hosted previews (compile each main.dart into runnable Flutter web)
+#    Requires a local Flutter (auto-detects fvm; outputs to site/public/preview/, gitignored)
 npm run previews
 
-# 3) 本地起站点（内嵌真实运行的预览 + 复制按钮）
+# 3) Run the site locally (embeds the running previews + copy buttons)
 npm run site:dev
 
-# 4) 构建并接入 MCP
+# 4) Build and connect the MCP server
 npm run mcp:build
 ```
 
-### 接入 Claude Code（一键复用）
+### Connect Claude Code (one-click reuse)
 
-发布到 npm 后，任何人零安装接入：
+Once published to npm, anyone can connect with zero install:
 
 ```bash
 claude mcp add flutter-motion -- npx -y flutter-motion-mcp
 ```
 
-本地开发版：
+Local dev build:
 
 ```bash
 npm run mcp:build
 claude mcp add flutter-motion -- node /abs/path/to/flutter-motion-kit/mcp/dist/index.js
 ```
 
-之后在 CC 里直接：「找一个 Flutter 列表入场动画并加到我的页面」——它会调用 `search_flutter_animation` → `get_animation`，拿到**验证过的代码 + 避坑要点**落地。
+Then, right in Claude Code: "find a Flutter list-entrance animation and add it to my page" — it calls `search_flutter_animation` → `get_animation` and lands the **verified code + pitfalls**.
 
-## MCP 工具
+## MCP tools
 
-| Tool | 作用 |
+| Tool | Purpose |
 |---|---|
-| `search_flutter_animation` | 按关键词/分类检索动画（返回摘要） |
-| `get_animation` | 按 id 返回完整代码 + 坑 + 出处 |
-| `list_pitfalls` | 拉坑清单，AI 写完自检用 |
-| `list_categories` | 浏览分类 |
+| `search_flutter_animation` | Search animations by keyword/category (returns summaries) |
+| `get_animation` | Return full code + pitfalls + sources by id |
+| `list_pitfalls` | Pull the pitfall list for an AI to self-check after writing |
+| `list_categories` | Browse categories |
 
-## 部署远程 MCP（Cloudflare Worker）
+## Deploy the remote MCP (Cloudflare Worker)
 
 ```bash
 cd worker
 npm i -g wrangler && wrangler login
 
-cp wrangler.toml.example wrangler.toml   # 真实配置不进仓库（已 gitignore）
+cp wrangler.toml.example wrangler.toml   # real config stays out of the repo (gitignored)
 
-# 建 KV（连接计数），把输出的 id 填进本地 wrangler.toml
+# Create the KV namespace (connection counter) and put the printed id into your local wrangler.toml
 wrangler kv namespace create STATS
 wrangler kv namespace create STATS --preview
 
-npm run deploy        # 自动重建 catalog 并打包部署
+npm run deploy        # rebuilds the catalog and bundles + deploys
 ```
 
-部署后访问 `/stats` 看实时连接数，`/mcp` 是 MCP 端点，`/` 看接入提示。
+After deploy: `/stats` shows the live connection count, `/mcp` is the MCP endpoint, `/` shows connect hints.
 
-站点侧：`cp site/.env.example site/.env` 并把 `PUBLIC_MCP_ORIGIN` 填成你的 Worker 端点（这份 `.env` 也不进仓库）。
+On the site side: `cp site/.env.example site/.env` and set `PUBLIC_MCP_ORIGIN` to your Worker endpoint (this `.env` is also kept out of the repo).
 
-> **部署配置私有化**：`worker/wrangler.toml`、`site/.env`、`.dev.vars` 均已 gitignore——你的 KV id / account / 子域不会出现在公开仓库，仓库只留 `*.example` 占位。想连账号子域都不暴露，给 Worker 绑自定义域（见 `wrangler.toml.example` 注释）。
+> **Private deploy config**: `worker/wrangler.toml`, `site/.env`, and `.dev.vars` are all gitignored — your KV id / account / subdomain never appear in the public repo, which only keeps `*.example` placeholders. To avoid exposing even the account subdomain, bind a custom domain to the Worker (see the comments in `wrangler.toml.example`).
 
-> 统计：每次 `initialize` 计一次连接（KV 近似计数，够做实时徽章）。需要精确去重时升级为 Durable Object / Analytics Engine。
+> Stats: each `initialize` counts one connection (an approximate KV counter — good enough for a live badge). For exact de-duplication, upgrade to a Durable Object / Analytics Engine.
 
-## 目录
+## Layout
 
 ```
-content/animations/   # 唯一数据源（每个动画一个目录）
-schema/               # meta.yaml 的 JSON Schema
-scripts/              # build-catalog（聚合）/ build-previews（自托管预览）/ sync-gists（DartPad，可选）
-site/                 # Astro 画廊（预览 + 复制按钮）
+content/animations/   # single source of truth (one directory per animation)
+schema/               # JSON Schema for meta.yaml
+scripts/              # build-catalog (aggregate) / build-previews (self-hosted previews) / sync-gists (DartPad, optional)
+site/                 # Astro gallery (previews + copy buttons) + /playground (interactive)
 mcp/                  # MCP server (TypeScript)
-.github/workflows/    # verify：schema + analyze + format + build
+.github/workflows/    # verify: schema + analyze + format + build
 ```
 
-## 贡献
+## Contributing
 
-收录新动画前请过 [CONTRIBUTING.md](./CONTRIBUTING.md) 的质量 checklist。欢迎用 issue/PR 纠错——公开可纠错正是它比博客更可信的地方。
+Please run through the quality checklist in [CONTRIBUTING.md](./CONTRIBUTING.md) before adding a new animation. Corrections via issue/PR are welcome — being publicly correctable is exactly what makes this more trustworthy than a blog.
 
 ## License
 

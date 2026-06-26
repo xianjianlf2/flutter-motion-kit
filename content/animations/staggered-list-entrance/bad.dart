@@ -1,4 +1,4 @@
-// ❌ 反面教材：listener 里 setState 全量重建 + AnimatedBuilder 不传 child + 漏 dispose。
+// ❌ Anti-pattern: setState in the listener rebuilds everything + AnimatedBuilder without a child + missing dispose.
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MaterialApp(home: _Demo()));
@@ -10,16 +10,24 @@ class _Demo extends StatefulWidget {
 }
 
 class _DemoState extends State<_Demo> with SingleTickerProviderStateMixin {
-  static const _items = ['Inbox', 'Drafts', 'Sent', 'Starred', 'Archive', 'Trash'];
+  static const _items = [
+    'Inbox',
+    'Drafts',
+    'Sent',
+    'Starred',
+    'Archive',
+    'Trash'
+  ];
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 900),
   )
-    ..addListener(() => setState(() {})) // ❌ 每帧 setState，整页重建
+    ..addListener(
+        () => setState(() {})) // ❌ setState every frame rebuilds the whole page
     ..forward();
 
-  // ❌ 没有 dispose() —— Ticker 泄漏
+  // ❌ No dispose() — the Ticker leaks
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +37,7 @@ class _DemoState extends State<_Demo> with SingleTickerProviderStateMixin {
         itemCount: _items.length,
         itemBuilder: (context, i) {
           final v = _controller.value;
-          // ❌ 子树（ListTile）在每帧都被重新构建
+          // ❌ the subtree (ListTile) is rebuilt on every frame
           return Opacity(
             opacity: v,
             child: Transform.translate(

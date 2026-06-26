@@ -1,4 +1,4 @@
-// 运行时无关的工具逻辑 —— 同时被 stdio 版(index.ts) 和 Cloudflare Worker 复用。
+// Runtime-agnostic tool logic — shared by both the stdio build (index.ts) and the Cloudflare Worker.
 export type Pitfall = {
   claim: string; fix: string; source: string; confidence: string; provenBy?: string;
 };
@@ -13,15 +13,15 @@ export const CATEGORIES = [
   'implicit', 'explicit', 'hero', 'staggered', 'physics', 'custom-painter', 'rive-lottie',
 ] as const;
 
-// 工具定义（JSON Schema 形式，stdio 和 HTTP 两端都能用）
+// Tool definitions (JSON Schema form, usable by both the stdio and HTTP ends).
 export const TOOL_DEFS = [
   {
     name: 'search_flutter_animation',
-    description: '按关键词/分类/标签检索 Flutter 动画实现，返回匹配条目的摘要（不含完整代码）。',
+    description: 'Search Flutter animation implementations by keyword / category / tag; returns matching summaries (no full code).',
     inputSchema: {
       type: 'object',
       properties: {
-        query: { type: 'string', description: '自然语言或关键词，如 "列表 入场" / "hero" / "弹性"' },
+        query: { type: 'string', description: 'Natural language or keywords, e.g. "list entrance" / "hero" / "spring"' },
         category: { type: 'string', enum: CATEGORIES },
         limit: { type: 'number', minimum: 1, maximum: 20, default: 5 },
       },
@@ -30,23 +30,23 @@ export const TOOL_DEFS = [
   },
   {
     name: 'get_animation',
-    description: '按 id 返回完整内容：可直接使用的代码(code) + 错误写法反例(badCode，用于对照) + 必须注意的坑（含出处与可信度）+ 验证日期。',
+    description: 'Return the full entry by id: ready-to-use code (code) + an anti-example of the wrong way (badCode, for contrast) + the pitfalls to watch (with sources and confidence) + the verification date.',
     inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
   },
   {
     name: 'list_pitfalls',
-    description: '返回（某分类下）所有动画的「坑」清单，适合 AI 写完 Flutter 动画后自检。',
+    description: 'Return the list of pitfalls across all animations (optionally within a category) — handy for an AI to self-check after writing a Flutter animation.',
     inputSchema: { type: 'object', properties: { category: { type: 'string' } } },
   },
   {
     name: 'list_categories',
-    description: '列出所有动画分类及数量。',
+    description: 'List all animation categories and their counts.',
     inputSchema: { type: 'object', properties: {} },
   },
 ] as const;
 
-// 按词打分：把 query 拆成词逐个累加，"列表 入场" 这种多词查询也能命中
-// （旧版把整串当子串匹配，空格一断就召回为 0）。
+// Per-term scoring: split the query into words and sum, so multi-word queries like "list entrance" still match
+// (the old version matched the whole string as a substring, so a single space dropped recall to 0).
 const scoreTerm = (e: Entry, t: string) => {
   let s = 0;
   if (e.id.includes(t) || e.title.toLowerCase().includes(t)) s += 5;
@@ -84,8 +84,8 @@ export function getAnimation(catalog: Catalog, id: string) {
   return {
     id: e.id, title: e.title, category: e.category, verifiedOn: e.verifiedOn,
     code: e.code, badCode: e.badCode ?? null, pitfalls: e.pitfalls, docs: e.docs, dartpadUrl: e.dartpadUrl,
-    usageNote: '采用 code 中的正确实现，并遵守 pitfalls 中的 fix；confidence 标明每条依据的强度。'
-      + (e.badCode ? ' badCode 是「错误写法」反例——用于对照，切勿照搬。' : ''),
+    usageNote: 'Use the correct implementation in `code` and follow the fixes in `pitfalls`; `confidence` marks how strong each basis is.'
+      + (e.badCode ? ' `badCode` is the wrong-way anti-example — for contrast only, never copy it.' : ''),
   };
 }
 
@@ -104,7 +104,7 @@ export function listCategories(catalog: Catalog) {
   };
 }
 
-// 统一的工具调用入口
+// Unified tool dispatch entry point
 export function callTool(catalog: Catalog, name: string, args: Record<string, unknown>) {
   switch (name) {
     case 'search_flutter_animation':

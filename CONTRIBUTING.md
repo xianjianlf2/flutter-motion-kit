@@ -1,50 +1,50 @@
-# 收录一条动画前的质量 checklist
+# Quality checklist before adding an animation
 
-本项目的可信度来自「能证明 + 有出处 + 机器验证」，而非作者语气。新增/修改条目前，请逐项过：
+This project earns trust from "provable + sourced + machine-verified", not from the author's tone. Before adding or changing an entry, go through each item:
 
-## 1. 结构
+## 1. Structure
 
-在 `content/animations/<id>/` 下放：
+Under `content/animations/<id>/`, add:
 
-- `meta.yaml` — 符合 [`schema/animation.schema.json`](./schema/animation.schema.json)，`id` 必须等于目录名
-- `main.dart` — **最小可复现**的「正确实现」，可直接粘进 [DartPad](https://dartpad.dev) 运行
-- `bad.dart`（推荐）— 对应的「错误写法」，用于对比演示
-- `test/*.dart`（内存/状态类坑推荐）— 自动化佐证
+- `meta.yaml` — conforms to [`schema/animation.schema.json`](./schema/animation.schema.json); `id` must equal the folder name
+- `main.dart` — the **minimal reproducible** correct implementation, runnable as-is in [DartPad](https://dartpad.dev)
+- `bad.dart` (recommended) — the matching wrong way, for a side-by-side demo
+- `test/*.dart` (recommended for memory/state pitfalls) — automated evidence
 
-## 2. 代码必须过机器门禁
+## 2. Code must pass the machine gate
 
 ```bash
 dart format --set-exit-if-changed main.dart
-flutter analyze main.dart          # 基线：very_good_analysis.yaml
-flutter build web                  # 必须能编译运行（杜绝幻觉 API）
+flutter analyze main.dart          # baseline: very_good_analysis.yaml
+flutter build web                  # must compile and run (no hallucinated APIs)
 ```
 
-`main.dart` 跑不过以上任一项 → 不允许合并（CI 会拦）。
+If `main.dart` fails any of these → it can't be merged (CI blocks it).
 
-## 3. 每条「坑」必须可追溯
+## 3. Every pitfall must be traceable
 
-`pitfalls[]` 里每条都要有：
+Each entry in `pitfalls[]` needs:
 
-- `claim` 现象 + `fix` 正确做法
-- `source` 出处（**优先官方**：cookbook > API docs > flutter/samples > flutter/flutter issue）
-- `confidence` 依据强度，**诚实标注**：
-  - `official-docs` 官方文档明确
-  - `github-issue` 有 issue 佐证
-  - `measured` 自己用 DevTools / `--profile` 实测（请在 PR 附数据）
-  - `community-consensus` 社区广泛共识
-  - `author-experience` 个人经验（**不要伪装成权威**）
-- `provenBy`（可选）指向证明它的测试
+- `claim` (the symptom) + `fix` (the right way)
+- `source` (**prefer official**: cookbook > API docs > flutter/samples > flutter/flutter issue)
+- `confidence`, **labeled honestly**:
+  - `official-docs` — stated clearly in the official docs
+  - `github-issue` — backed by an issue
+  - `measured` — measured yourself with DevTools / `--profile` (please attach the data in the PR)
+  - `community-consensus` — broad community agreement
+  - `author-experience` — personal experience (**don't dress it up as authority**)
+- `provenBy` (optional) — points to a test that proves it
 
-## 4. 标注验证信息
+## 4. Record verification info
 
-- `verifiedOn`: 形如 `"Flutter 3.32 / 2026-06"`——别人据此判断是否过时
-- 升级 Flutter 后若重验通过，更新该日期
+- `verifiedOn`: like `"Flutter 3.32 / 2026-06"` — others use it to judge whether it's stale
+- After upgrading Flutter and re-verifying, update this date
 
-## 5. 性能/可达性（适用时）
+## 5. Performance / accessibility (when applicable)
 
-- 性能类坑给出 DevTools timeline 或帧耗时数据，不写“感觉卡”
-- 涉及强动效的，考虑 `MediaQuery.of(context).disableAnimations`
+- For performance pitfalls, give a DevTools timeline or frame-time numbers, not "feels janky"
+- For strong motion, consider `MediaQuery.of(context).disableAnimations`
 
 ---
 
-> 拿不准就标 `author-experience` 并说明理由。**可追溯的不确定，好过伪装的确定。**
+> When in doubt, label it `author-experience` and explain why. **Traceable uncertainty beats faked certainty.**

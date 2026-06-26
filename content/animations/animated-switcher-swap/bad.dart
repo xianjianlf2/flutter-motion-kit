@@ -1,6 +1,6 @@
-// ❌ 反面教材：child 不带 Key。
-// AnimatedSwitcher 认为前后是同一个 Text widget，只是参数变了 ->
-// 数字会瞬间跳变，完全没有过渡动画。
+// ❌ Anti-pattern: the child has no Key.
+// AnimatedSwitcher thinks it's the same Text widget before and after, just with changed parameters ->
+// the number jumps instantly, with no transition animation at all.
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MaterialApp(home: _Demo()));
@@ -24,7 +24,7 @@ class _DemoState extends State<_Demo> {
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 350),
           child: Text(
-            '$_count', // ❌ 没有 key -> 不触发切换动画
+            '$_count', // ❌ no key -> the swap animation never triggers
             style: const TextStyle(fontSize: 96, fontWeight: FontWeight.bold),
           ),
         ),

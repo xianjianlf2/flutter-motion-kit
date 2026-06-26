@@ -1,5 +1,5 @@
-// ✅ 推荐：PageRouteBuilder + CurvedAnimation，淡入 + 上滑，进/出时长都显式设置。
-// 可直接粘进 DartPad (https://dartpad.dev) 运行。
+// ✅ Recommended: PageRouteBuilder + CurvedAnimation, fade-in + slide-up, with explicit enter/exit durations.
+// Paste straight into DartPad (https://dartpad.dev) to run.
 import 'package:flutter/material.dart';
 
 void main() => runApp(const _App());
@@ -13,14 +13,15 @@ class _App extends StatelessWidget {
       );
 }
 
-// 可复用的转场：淡入 + 轻微上滑
+// Reusable transition: fade-in + a slight slide-up
 Route<T> fadeSlideRoute<T>(Widget page) {
   return PageRouteBuilder<T>(
     transitionDuration: const Duration(milliseconds: 350),
     reverseTransitionDuration: const Duration(milliseconds: 300),
     pageBuilder: (context, animation, secondaryAnimation) => page,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+      final curved =
+          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
       return FadeTransition(
         opacity: curved,
         child: SlideTransition(
@@ -28,7 +29,7 @@ Route<T> fadeSlideRoute<T>(Widget page) {
             begin: const Offset(0, 0.08),
             end: Offset.zero,
           ).animate(curved),
-          child: child, // 复用传入的 child
+          child: child, // reuse the passed-in child
         ),
       );
     },
@@ -43,7 +44,8 @@ class _HomePage extends StatelessWidget {
       appBar: AppBar(title: const Text('Home')),
       body: Center(
         child: FilledButton(
-          onPressed: () => Navigator.of(context).push(fadeSlideRoute(const _SecondPage())),
+          onPressed: () =>
+              Navigator.of(context).push(fadeSlideRoute(const _SecondPage())),
           child: const Text('Open with fade + slide'),
         ),
       ),

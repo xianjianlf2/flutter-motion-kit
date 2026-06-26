@@ -1,6 +1,6 @@
-// ❌ 反面教材：为了一个简单过渡手写 AnimationController。
-// 问题：① 代码量翻倍 ② 极易漏 dispose 造成 ticker 泄漏（此处故意漏）
-//      ③ 用 setState 监听 = 每帧整体重建。隐式动画一行就能替代这一切。
+// ❌ Anti-pattern: hand-rolling an AnimationController for a trivial transition.
+// Problems: ① twice the code ② easy to forget dispose and leak the ticker (intentionally leaked here)
+//      ③ listening via setState rebuilds everything every frame. An implicit animation replaces all of this in one line.
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MaterialApp(home: _Demo()));
@@ -15,9 +15,9 @@ class _DemoState extends State<_Demo> with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 400),
-  )..addListener(() => setState(() {})); // ❌ 每帧 setState
+  )..addListener(() => setState(() {})); // ❌ setState every frame
 
-  // ❌ 故意没有 dispose() —— 真实项目里这就是一处 ticker / 内存泄漏
+  // ❌ Deliberately no dispose() — in a real project this is a ticker / memory leak
 
   @override
   Widget build(BuildContext context) {

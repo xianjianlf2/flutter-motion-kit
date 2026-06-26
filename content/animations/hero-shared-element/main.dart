@@ -1,5 +1,5 @@
-// ✅ 推荐：列表页与详情页用同一个唯一 tag，框架自动接管共享元素飞行。
-// 可直接粘进 DartPad (https://dartpad.dev) 运行。
+// ✅ Recommended: the list page and detail page share the same unique tag, and the framework handles the shared-element flight automatically.
+// Paste straight into DartPad (https://dartpad.dev) to run.
 import 'package:flutter/material.dart';
 
 void main() => runApp(const _App());
@@ -15,8 +15,12 @@ class _App extends StatelessWidget {
 }
 
 const _colors = [
-  Colors.red, Colors.green, Colors.blue,
-  Colors.orange, Colors.purple, Colors.teal,
+  Colors.red,
+  Colors.green,
+  Colors.blue,
+  Colors.orange,
+  Colors.purple,
+  Colors.teal,
 ];
 
 class _GridPage extends StatelessWidget {
@@ -34,10 +38,11 @@ class _GridPage extends StatelessWidget {
           for (final (i, c) in _colors.indexed)
             GestureDetector(
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => _DetailPage(index: i, color: c)),
+                MaterialPageRoute(
+                    builder: (_) => _DetailPage(index: i, color: c)),
               ),
               child: Hero(
-                tag: 'box-$i', // 唯一 tag，与详情页一致
+                tag: 'box-$i', // unique tag, matching the detail page
                 child: Container(
                   decoration: BoxDecoration(
                     color: c,
@@ -63,7 +68,7 @@ class _DetailPage extends StatelessWidget {
       appBar: AppBar(),
       body: Center(
         child: Hero(
-          tag: 'box-$index', // 与列表页同一个 tag
+          tag: 'box-$index', // same tag as the list page
           child: Container(
             width: 260,
             height: 260,

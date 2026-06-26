@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // content/animations/*/{meta.yaml,main.dart,bad.dart} -> catalog.json
-// 这是唯一数据源到「站点 + MCP + /api」的单一构建出口。
+// The single build output that turns the one source of truth into "site + MCP + /api".
 import { readdir, readFile, writeFile, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -43,13 +43,13 @@ for (const id of ids) {
     console.error(`✗ ${id}: meta.id "${meta.id}" != folder name`);
     continue;
   }
-  // provenBy 不能虚标：指向的测试文件必须真实存在，否则「机器证明」是空头支票
+  // provenBy must not be faked: the test file it points to has to actually exist, otherwise the "machine proof" is just an empty promise
   const badProven = (meta.pitfalls ?? []).filter(
     (p) => p.provenBy && !existsSync(join(dir, p.provenBy)),
   );
   if (badProven.length) {
     errors++;
-    for (const p of badProven) console.error(`✗ ${id}: provenBy 指向不存在的文件 "${p.provenBy}"`);
+    for (const p of badProven) console.error(`✗ ${id}: provenBy points to a non-existent file "${p.provenBy}"`);
     continue;
   }
 
@@ -71,7 +71,7 @@ if (errors) {
 
 entries.sort((a, b) => a.difficulty - b.difficulty || a.id.localeCompare(b.id));
 const catalog = {
-  generatedAt: process.env.BUILD_TIME ?? null, // 由 CI 注入，脚本本身不取系统时间
+  generatedAt: process.env.BUILD_TIME ?? null, // injected by CI; the script itself never reads the system clock
   count: entries.length,
   categories: [...new Set(entries.map((e) => e.category))].sort(),
   entries,

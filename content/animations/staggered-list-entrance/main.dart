@@ -1,5 +1,5 @@
-// ✅ 推荐：单个 controller + Interval 错峰，AnimatedBuilder 传 child，正确 dispose。
-// 可直接粘进 DartPad (https://dartpad.dev) 运行。
+// ✅ Recommended: a single controller + Interval staggering, AnimatedBuilder with a child, and proper dispose.
+// Paste straight into DartPad (https://dartpad.dev) to run.
 import 'package:flutter/material.dart';
 
 void main() => runApp(const _App());
@@ -20,9 +20,16 @@ class _Demo extends StatefulWidget {
   State<_Demo> createState() => _DemoState();
 }
 
-// 单个控制器 → SingleTickerProviderStateMixin
+// Single controller → SingleTickerProviderStateMixin
 class _DemoState extends State<_Demo> with SingleTickerProviderStateMixin {
-  static const _items = ['Inbox', 'Drafts', 'Sent', 'Starred', 'Archive', 'Trash'];
+  static const _items = [
+    'Inbox',
+    'Drafts',
+    'Sent',
+    'Starred',
+    'Archive',
+    'Trash'
+  ];
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -31,7 +38,7 @@ class _DemoState extends State<_Demo> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    _controller.dispose(); // ✅ 释放 Ticker，杜绝泄漏
+    _controller.dispose(); // ✅ release the Ticker to prevent leaks
     super.dispose();
   }
 
@@ -42,7 +49,7 @@ class _DemoState extends State<_Demo> with SingleTickerProviderStateMixin {
       body: ListView.builder(
         itemCount: _items.length,
         itemBuilder: (context, i) {
-          // 每个 item 一段错峰区间，begin/end 都保证落在 [0,1]
+          // Each item gets a staggered interval; begin/end always stay within [0,1]
           final start = (i / _items.length) * 0.6;
           final anim = CurvedAnimation(
             parent: _controller,
@@ -50,7 +57,7 @@ class _DemoState extends State<_Demo> with SingleTickerProviderStateMixin {
           );
           return _Entrance(
             animation: anim,
-            // child 不随动画变化 → 作为 child 传入，避免每帧重建
+            // the child doesn't change with the animation → pass it as the child to avoid rebuilding it every frame
             child: ListTile(
               leading: CircleAvatar(child: Text('${i + 1}')),
               title: Text(_items[i]),
@@ -71,7 +78,7 @@ class _Entrance extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: animation,
-      // ✅ 关键：复用传入的 child，builder 只做轻量的 Transform/Opacity
+      // ✅ Key idea: reuse the passed-in child; the builder only does lightweight Transform/Opacity
       child: child,
       builder: (context, child) => Opacity(
         opacity: animation.value,

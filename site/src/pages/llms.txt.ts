@@ -1,14 +1,15 @@
 import type { APIRoute } from 'astro';
 import catalog from '../../../catalog.json';
 
-// /llms.txt —— 给 AI 搜索引擎 / agent 的纯文本目录（含 MCP 接入方式）。
+// /llms.txt — a plain-text catalog for AI search engines / agents (including how to connect via MCP).
 export const GET: APIRoute = ({ site }) => {
   const base = site?.href.replace(/\/$/, '') ?? '';
   const lines = [
     '# Flutter Motion Kit',
     '',
-    '> 可预览的 Flutter 动画实现集合，每条带「对应的坑（含出处与可信度）」，',
-    '> 并提供 MCP server 供 AI 编码助手（Claude Code / Cursor）直接检索复用。',
+    '> A collection of previewable Flutter animations, each annotated with its pitfalls',
+    '> (with sources and confidence), plus an MCP server so AI coding assistants',
+    '> (Claude Code / Cursor) can search and reuse them directly.',
     '',
     '## Use via MCP',
     '',
@@ -19,7 +20,7 @@ export const GET: APIRoute = ({ site }) => {
     '',
     ...catalog.entries.map(
       (e) =>
-        `- [${e.title}](${base}/a/${e.id}) — ${e.category}, 难度 ${e.difficulty}/5, ` +
+        `- [${e.title}](${base}/a/${e.id}) — ${e.category}, difficulty ${e.difficulty}/5, ` +
         `${e.pitfalls.length} pitfalls. ${e.summary.trim()}`,
     ),
     '',

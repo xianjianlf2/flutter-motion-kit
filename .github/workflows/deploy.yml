@@ -1,11 +1,11 @@
 name: deploy
 
-# 内容/代码改动推送到 main 即自动重部署站点 + Worker。
-# 需要在仓库 Settings 配置：
-#   Secrets:   CLOUDFLARE_API_TOKEN（Workers + Pages + KV 编辑权限）
+# Pushing content/code changes to main automatically redeploys the site + Worker.
+# Requires the following in the repo Settings:
+#   Secrets:   CLOUDFLARE_API_TOKEN (Workers + Pages + KV edit permissions)
 #              CLOUDFLARE_ACCOUNT_ID
-#              WRANGLER_TOML（worker/wrangler.toml 的完整内容，含真实 KV id —— 这样它不必进仓库）
-#   Variables: PUBLIC_MCP_ORIGIN（你的 Worker 地址，如 https://flutter-motion-kit.xxx.workers.dev）
+#              WRANGLER_TOML (the full contents of worker/wrangler.toml, including the real KV id — so it doesn't have to live in the repo)
+#   Variables: PUBLIC_MCP_ORIGIN (your Worker URL, e.g. https://flutter-motion-kit.xxx.workers.dev)
 on:
   push:
     branches: [main]
@@ -22,7 +22,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with: { channel: stable, flutter-version: 3.32.0 }
       - run: npm ci
-      # 自托管预览：把每条 main.dart 编译成真能跑的 Flutter web，随站点一起部署
+      # Self-hosted previews: compile each main.dart into runnable Flutter web and deploy it alongside the site
       - run: npm run previews
       - run: npm run site:build
         env:
@@ -42,8 +42,8 @@ jobs:
         with: { node-version: 20 }
       - run: npm ci
       - run: node scripts/build-catalog.mjs && npm -w mcp run build
-      # 私有配置不在仓库里：从 secret 还原 worker/wrangler.toml
-      # 经由 env 传入，避免 secret 里的双引号把 shell 字符串截断（会丢引号 → wrangler 解析报错）
+      # Private config isn't in the repo: restore worker/wrangler.toml from the secret
+      # Passed via env to keep double quotes in the secret from truncating the shell string (lost quotes -> wrangler parse error)
       - run: printf '%s' "$WRANGLER_TOML" > worker/wrangler.toml
         env:
           WRANGLER_TOML: ${{ secrets.WRANGLER_TOML }}

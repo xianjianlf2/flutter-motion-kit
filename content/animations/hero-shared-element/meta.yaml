@@ -1,29 +1,30 @@
 id: hero-shared-element
-title: Hero 共享元素转场
+title: Hero shared-element transition
 category: hero
 difficulty: 2
 tags: [hero, navigation, shared-element, transition]
 summary: >
-  点击网格项，元素「飞」到详情页对应位置。两端用同一个 Hero tag，框架自动接管过渡。
+  Tap a grid item and the element "flies" to its spot on the detail page. Both ends
+  share one Hero tag and the framework takes over the transition.
 verifiedOn: "Flutter 3.32 / 2026-06"
 gistId: ""
 docs:
   - https://docs.flutter.dev/ui/animations/hero-animations
   - https://api.flutter.dev/flutter/widgets/Hero-class.html
 pitfalls:
-  - claim: 同一屏幕同时出现两个相同 tag 的 Hero 会直接抛异常。
-    fix: tag 必须全局唯一（用 id 拼接，如 'box-$i'），同屏不可重复。
+  - claim: Two Heroes with the same tag on screen at once throw an exception.
+    fix: Tags must be globally unique (compose with an id, e.g. 'box-$i'); never duplicate on the same screen.
     source: https://api.flutter.dev/flutter/widgets/Hero-class.html
     confidence: official-docs
-  - claim: 嵌套 Navigator（如 BottomNavigationBar 内）里的 Hero 不会跨外层路由飞行。
-    fix: 确保起止页在同一个 Navigator；或用 flightShuttleBuilder 自定义飞行组件。
+  - claim: A Hero inside a nested Navigator (e.g. within a BottomNavigationBar) won't fly across the outer route.
+    fix: Keep both ends under the same Navigator, or supply a flightShuttleBuilder for the flying widget.
     source: https://api.flutter.dev/flutter/widgets/Hero/flightShuttleBuilder.html
     confidence: official-docs
-  - claim: 首尾尺寸/圆角差异大时，默认矩形插值可能出现突变或裁切。
-    fix: 用 createRectTween 提供更平滑的飞行轨迹，子组件保持一致的 BoxFit/形状。
+  - claim: When start/end size or corner radius differ a lot, the default rect interpolation can jump or clip.
+    fix: Use createRectTween for a smoother flight path and keep a consistent BoxFit / shape on the child.
     source: https://api.flutter.dev/flutter/widgets/Hero/createRectTween.html
     confidence: official-docs
-  - claim: Hero 飞行期间原位置会留白。
-    fix: 需要占位时用 placeholderBuilder 填充。
+  - claim: The origin leaves a gap while the Hero is in flight.
+    fix: Fill it with placeholderBuilder when you need a placeholder.
     source: https://api.flutter.dev/flutter/widgets/Hero/placeholderBuilder.html
     confidence: official-docs

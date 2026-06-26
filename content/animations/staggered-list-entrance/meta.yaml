@@ -1,11 +1,11 @@
 id: staggered-list-entrance
-title: 列表项交错入场
+title: Staggered list entrance
 category: staggered
 difficulty: 3
 tags: [list, staggered, entrance, AnimatedBuilder, controller]
 summary: >
-  列表项依次「淡入 + 上滑」入场。用单个 AnimationController + Interval 错峰驱动，
-  比给每个 item 各开一个 controller 更省资源。
+  List items fade-and-slide in one after another. A single AnimationController +
+  Interval drives the stagger — cheaper than one controller per item.
 verifiedOn: "Flutter 3.32 / 2026-06"
 gistId: ""
 docs:
@@ -13,20 +13,20 @@ docs:
   - https://api.flutter.dev/flutter/widgets/AnimatedBuilder-class.html
   - https://api.flutter.dev/flutter/animation/Interval-class.html
 pitfalls:
-  - claim: AnimatedBuilder 的 builder 闭包里直接 new 子树，会导致每帧重建整棵子树。
-    fix: 把不随动画变化的内容作为 child 传入，builder 里复用该 child（只动 Transform/Opacity）。
+  - claim: Newing the subtree directly inside the AnimatedBuilder builder closure rebuilds the whole subtree every frame.
+    fix: Pass the animation-invariant content as child and reuse it in the builder (animate only Transform/Opacity).
     source: https://api.flutter.dev/flutter/widgets/AnimatedBuilder-class.html
     confidence: official-docs
-  - claim: 漏 dispose() 会泄漏 AnimationController 持有的 Ticker。
-    fix: 在 State.dispose() 里 _controller.dispose()；单控制器用 SingleTickerProviderStateMixin。
+  - claim: Forgetting dispose() leaks the Ticker held by the AnimationController.
+    fix: Call _controller.dispose() in State.dispose(); use SingleTickerProviderStateMixin for a single controller.
     source: https://api.flutter.dev/flutter/widgets/SingleTickerProviderStateMixin-mixin.html
     confidence: official-docs
-    provenBy: test/leak_test.dart      # 有自动化测试证明
-  - claim: Interval 的 begin/end 必须落在 [0,1]，越界不报错但行为错误。
-    fix: 错峰公式 begin = i * gap，end = begin + slice，确保 end <= 1。
+    provenBy: test/leak_test.dart      # proven by an automated test
+  - claim: Interval's begin/end must lie within [0,1]; out-of-range values don't error but behave wrong.
+    fix: Stagger formula begin = i * gap, end = begin + slice, ensuring end <= 1.
     source: https://api.flutter.dev/flutter/animation/Interval-class.html
     confidence: official-docs
-  - claim: 在 controller 的 listener 里 setState 会触发整个 widget 全量 rebuild。
-    fix: 用 AnimatedBuilder/FadeTransition 把重建范围收敛到动画子树。
+  - claim: Calling setState in the controller's listener triggers a full rebuild of the entire widget.
+    fix: Use AnimatedBuilder/FadeTransition to confine rebuilds to the animation subtree.
     source: https://docs.flutter.dev/ui/animations/tutorial
     confidence: official-docs

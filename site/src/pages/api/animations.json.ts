@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import catalog from '../../../../catalog.json';
 
-// /api/animations.json —— 完整目录，供任意 agent / 工具消费。
+// /api/animations.json — the full catalog, for any agent / tool to consume.
 export const GET: APIRoute = () =>
   new Response(JSON.stringify(catalog), {
     headers: {

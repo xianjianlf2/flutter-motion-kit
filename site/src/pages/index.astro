@@ -3,24 +3,26 @@ import Base from '../layouts/Base.astro';
 import catalog from '../../../catalog.json';
 
 const { entries, categories } = catalog;
-// 真实 URL 放 site/.env 的 PUBLIC_MCP_ORIGIN（不进仓库），这里只有占位 fallback
+// The real URL lives in site/.env's PUBLIC_MCP_ORIGIN (not committed); this is just a placeholder fallback.
 const MCP_ORIGIN = import.meta.env.PUBLIC_MCP_ORIGIN ?? 'https://flutter-motion-kit.YOUR_SUBDOMAIN.workers.dev';
 const cursorConfig = Buffer.from(JSON.stringify({ url: `${MCP_ORIGIN}/mcp` })).toString('base64');
 ---
 
-<Base title="Flutter Motion Kit — 可预览的 Flutter 动画集合">
+<Base title="Flutter Motion Kit — previewable Flutter animations">
   <p style="color:var(--muted);max-width:680px">
-    每个动画都能在线预览（真实运行的 Flutter web，非录屏）、给出可直接使用的代码，并标注
-    <strong>对应的坑（含出处与可信度）</strong>。在 Claude Code / Cursor 里可通过 MCP 一键检索复用。
+    Every animation runs live in the browser (real Flutter web, not a screen recording),
+    ships copy-paste code, and is annotated with
+    <strong>its pitfalls (with sources and confidence)</strong>. Search and reuse them straight
+    from Claude Code / Cursor via MCP.
   </p>
 
   <div class="connect">
-    <strong>一键接入 AI 编辑器</strong>
+    <strong>One-click into your AI editor</strong>
     <span class="live" id="live"></span>
     <div class="btnrow">
       <a class="act primary" href={`cursor://anysphere.cursor-deeplink/mcp/install?name=flutter-motion&config=${cursorConfig}`}>Add to Cursor</a>
       <a class="act" href={`https://insiders.vscode.dev/redirect/mcp/install?name=flutter-motion&config=${encodeURIComponent(JSON.stringify({ url: `${MCP_ORIGIN}/mcp` }))}`}>Add to VS Code</a>
-      <button class="act" id="copy-cc">复制 Claude Code 命令</button>
+      <button class="act" id="copy-cc">Copy Claude Code command</button>
     </div>
     <code id="cc-cmd" style="display:block;margin-top:8px;font-size:12px;color:var(--muted)">claude mcp add --transport http flutter-motion {MCP_ORIGIN}/mcp</code>
   </div>
@@ -28,14 +30,14 @@ const cursorConfig = Buffer.from(JSON.stringify({ url: `${MCP_ORIGIN}/mcp` })).t
   <a class="playground-cta" href="/playground/">
     <span class="pg-icon">▶︎</span>
     <span>
-      <strong>打开交互式 Playground</strong>
-      <span class="pg-sub">拖动滑块实时调参 · 代码同步高亮 · 覆盖 6 大分类</span>
+      <strong>Open the interactive Playground</strong>
+      <span class="pg-sub">Drag sliders for live tweaks · code highlights in sync · covers all 6 categories</span>
     </span>
     <span class="pg-arrow">→</span>
   </a>
 
   <div class="filters" id="filters">
-    <span class="chip" data-cat="all" aria-pressed="true">全部</span>
+    <span class="chip" data-cat="all" aria-pressed="true">all</span>
     {categories.map((c) => <span class="chip" data-cat={c} aria-pressed="false">{c}</span>)}
   </div>
 
@@ -46,8 +48,8 @@ const cursorConfig = Buffer.from(JSON.stringify({ url: `${MCP_ORIGIN}/mcp` })).t
         <p>{e.summary}</p>
         <div class="badges">
           <span class="badge">{e.category}</span>
-          <span class="badge">难度 {e.difficulty}/5</span>
-          <span class="badge">⚠ {e.pitfalls.length} 个坑</span>
+          <span class="badge">difficulty {e.difficulty}/5</span>
+          <span class="badge">⚠ {e.pitfalls.length} pitfalls</span>
         </div>
       </a>
     ))}
@@ -67,27 +69,27 @@ const cursorConfig = Buffer.from(JSON.stringify({ url: `${MCP_ORIGIN}/mcp` })).t
       }),
     );
 
-    // 复制 Claude Code 接入命令
+    // Copy the Claude Code connect command
     const ccBtn = document.getElementById('copy-cc');
     ccBtn?.addEventListener('click', () => {
       const cmd = document.getElementById('cc-cmd')?.textContent ?? '';
       navigator.clipboard.writeText(cmd.trim()).then(() => {
         const o = ccBtn.textContent;
-        ccBtn.textContent = '✓ 已复制';
+        ccBtn.textContent = '✓ Copied';
         setTimeout(() => (ccBtn.textContent = o), 1400);
       });
     });
 
   </script>
 
-  <!-- 实时接入人数：mcpOrigin 由构建时注入（来自 site/.env），失败则静默隐藏 -->
+  <!-- Live connection count: mcpOrigin is injected at build time (from site/.env); silently hidden on failure -->
   <script define:vars={{ mcpOrigin: MCP_ORIGIN }}>
     fetch(`${mcpOrigin}/stats`)
       .then((r) => r.json())
       .then((d) => {
         const el = document.getElementById('live');
         if (el && typeof d.connections === 'number') {
-          el.textContent = `· 已有 ${d.connections} 位开发者接入`;
+          el.textContent = `· ${d.connections} developers connected`;
         }
       })
       .catch(() => {});

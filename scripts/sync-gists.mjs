@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-// 把每条动画的 main.dart 同步成一个 GitHub Gist，并把 gistId 回写进 meta.yaml。
-// DartPad 通过 ?id=<gistId> 内嵌运行。
+// Sync each animation's main.dart to a GitHub Gist and write the gistId back into meta.yaml.
+// DartPad embeds and runs it via ?id=<gistId>.
 //
-// 用法：GITHUB_TOKEN=ghp_xxx node scripts/sync-gists.mjs
-// token 需要 gist 权限。已有 gistId 的会更新该 gist，否则新建。
+// Usage: GITHUB_TOKEN=ghp_xxx node scripts/sync-gists.mjs
+// The token needs gist permission. Entries with an existing gistId update that gist; otherwise a new one is created.
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
 
 const token = process.env.GITHUB_TOKEN;
-if (!token) { console.error('需要 GITHUB_TOKEN（含 gist 权限）'); process.exit(1); }
+if (!token) { console.error('GITHUB_TOKEN required (with gist permission)'); process.exit(1); }
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const animDir = join(root, 'content', 'animations');
@@ -48,7 +48,7 @@ for (const id of ids) {
   const gist = await res.json();
 
   if (gist.id !== existing) {
-    // 回写 gistId（保守地按行替换，避免重排 YAML 注释）
+    // Write back the gistId (conservative line-based replace, to avoid reshuffling YAML comments)
     const updated = raw.match(/^gistId:/m)
       ? raw.replace(/^gistId:.*$/m, `gistId: "${gist.id}"`)
       : raw.replace(/^(verifiedOn:.*)$/m, `$1\ngistId: "${gist.id}"`);

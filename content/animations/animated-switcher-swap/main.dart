@@ -1,5 +1,5 @@
-// ✅ 推荐：给 child 唯一 ValueKey，AnimatedSwitcher 才能识别「内容变了」并过渡。
-// 可直接粘进 DartPad (https://dartpad.dev) 运行。
+// ✅ Recommended: give the child a unique ValueKey so AnimatedSwitcher can detect "the content changed" and transition.
+// Paste straight into DartPad (https://dartpad.dev) to run.
 import 'package:flutter/material.dart';
 
 void main() => runApp(const _App());
@@ -38,7 +38,7 @@ class _DemoState extends State<_Demo> {
           ),
           child: Text(
             '$_count',
-            // 关键：用 ValueKey 标识不同内容，否则不会有过渡
+            // Key idea: use a ValueKey to mark different content, otherwise there is no transition
             key: ValueKey<int>(_count),
             style: const TextStyle(fontSize: 96, fontWeight: FontWeight.bold),
           ),

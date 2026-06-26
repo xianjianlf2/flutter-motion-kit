@@ -2,14 +2,14 @@
 import '../styles/global.css';
 const {
   title = 'Flutter Motion Kit',
-  description = '可预览的 Flutter 动画实现集合 + 对应的坑，支持 Claude Code / Cursor 一键复用（MCP）。',
+  description = 'Previewable Flutter animations, each with its pitfalls — reuse straight from Claude Code / Cursor (MCP).',
 } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL('/og.png', Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -30,7 +30,7 @@ const ogImage = new URL('/og.png', Astro.site).href;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
-    <!-- 让 AI 搜索/agent 发现 MCP 与目录 -->
+    <!-- Help AI search / agents discover the MCP server and catalog -->
     <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
     <link rel="alternate" type="application/json" href="/api/animations.json" title="catalog" />
     <slot name="head" />
@@ -39,7 +39,7 @@ const ogImage = new URL('/og.png', Astro.site).href;
     <div class="wrap">
       <header class="site">
         <h1><a href="/">Flutter Motion Kit</a></h1>
-        <span class="tag">可预览的 Flutter 动画 + 避坑指南 · 支持 Claude Code 一键复用</span>
+        <span class="tag">Previewable Flutter animations + pitfall guide · one-click reuse from Claude Code</span>
       </header>
       <slot />
     </div>

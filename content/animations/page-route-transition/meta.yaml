@@ -1,29 +1,30 @@
 id: page-route-transition
-title: 自定义页面转场（淡入+上滑）
+title: Custom page transition (fade + slide-up)
 category: explicit
 difficulty: 2
 tags: [navigation, route, transition, page]
 summary: >
-  用 PageRouteBuilder 自定义进场动画（淡入 + 轻微上滑），替代默认平台转场。
+  Use PageRouteBuilder to customize the enter animation (fade + a slight slide-up)
+  instead of the default platform transition.
 verifiedOn: "Flutter 3.32 / 2026-06"
 gistId: ""
 docs:
   - https://api.flutter.dev/flutter/widgets/PageRouteBuilder-class.html
   - https://docs.flutter.dev/cookbook/animation/page-route-animation
 pitfalls:
-  - claim: 直接用线性 animation 做 Tween，过渡很生硬。
-    fix: 用 CurvedAnimation 包一层（如 easeOutCubic）再驱动 Fade/Slide。
+  - claim: Driving the Tween with a raw linear animation feels stiff.
+    fix: Wrap it in a CurvedAnimation (e.g. easeOutCubic) before driving Fade/Slide.
     source: https://docs.flutter.dev/cookbook/animation/page-route-animation
     confidence: official-docs
-  - claim: 只设 transitionDuration、忘了 reverseTransitionDuration，返回过渡时长不一致。
-    fix: 两个时长都显式设置。
+  - claim: Setting only transitionDuration and forgetting reverseTransitionDuration makes the back transition a different length.
+    fix: Set both durations explicitly.
     source: https://api.flutter.dev/flutter/widgets/PageRouteBuilder/reverseTransitionDuration.html
     confidence: official-docs
-  - claim: 在 transitionsBuilder 里重建大子树，而非使用传入的 child，会每帧重建页面。
-    fix: 始终复用回调里的 child 参数。
+  - claim: Rebuilding a big subtree inside transitionsBuilder instead of using the passed-in child rebuilds the page every frame.
+    fix: Always reuse the child argument from the callback.
     source: https://api.flutter.dev/flutter/widgets/PageRouteBuilder/transitionsBuilder.html
     confidence: official-docs
-  - claim: 想全 App 统一转场却在每处手写，难维护且不一致。
-    fix: 用 ThemeData.pageTransitionsTheme 配 PageTransitionsBuilder 统一覆盖。
+  - claim: Hand-writing the same transition everywhere for an app-wide look is hard to maintain and inconsistent.
+    fix: Configure ThemeData.pageTransitionsTheme with a PageTransitionsBuilder to override it app-wide.
     source: https://api.flutter.dev/flutter/material/PageTransitionsTheme-class.html
     confidence: official-docs

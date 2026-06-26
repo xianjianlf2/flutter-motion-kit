@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "可预览的 Flutter 动画实现集合 + 对应的坑，支持 Claude Code / Cursor 一键复用（远程 MCP）。",
+  "description": "Previewable Flutter animations, each with its pitfalls — reuse straight from Claude Code / Cursor (remote MCP).",
   "workspaces": ["mcp", "site", "worker"],
   "scripts": {
     "catalog": "node scripts/build-catalog.mjs",

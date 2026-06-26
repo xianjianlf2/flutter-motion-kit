@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * flutter-motion-kit MCP server (stdio, 本地/离线版)
- * 远程托管版见 worker/。两者共用 src/tools.ts 的工具逻辑。
+ * flutter-motion-kit MCP server (stdio, local/offline build)
+ * See worker/ for the remotely hosted build. Both share the tool logic in src/tools.ts.
  *
- * 接入 Claude Code：
+ * Connect from Claude Code:
  *   claude mcp add flutter-motion -- npx -y flutter-motion-mcp
  */
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { TOOL_DEFS, callTool, type Catalog } from './tools.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
-// 解析顺序：显式 env > 随包发布的副本(mcp/catalog.json) > 开发时仓库根。
+// Resolution order: explicit env > the copy published with the package (mcp/catalog.json) > the repo root during development.
 function loadCatalog(): Catalog {
   const candidates = [
     process.env.CATALOG_PATH,

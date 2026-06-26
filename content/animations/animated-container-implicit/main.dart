@@ -1,5 +1,5 @@
-// ✅ 推荐：用隐式动画做简单属性过渡，零 controller、零 dispose 负担。
-// 可直接粘进 DartPad (https://dartpad.dev) 运行。
+// ✅ Recommended: use an implicit animation for simple property transitions — zero controllers, zero dispose burden.
+// Paste straight into DartPad (https://dartpad.dev) to run.
 import 'package:flutter/material.dart';
 
 void main() => runApp(const _App());
@@ -34,7 +34,7 @@ class _DemoState extends State<_Demo> {
         child: GestureDetector(
           onTap: () => setState(() => _expanded = !_expanded),
           child: AnimatedContainer(
-            // 关键：只声明「目标状态」，框架负责补间过渡。
+            // Key idea: just declare the "target state"; the framework handles the tween.
             duration: const Duration(milliseconds: 400),
             curve: Curves.easeInOutCubic,
             width: _expanded ? 240 : 120,

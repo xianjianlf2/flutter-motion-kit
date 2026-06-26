@@ -1,26 +1,27 @@
 id: animated-container-implicit
-title: AnimatedContainer 隐式动画
+title: AnimatedContainer (implicit)
 category: implicit            # implicit | explicit | hero | staggered | physics | custom-painter | rive-lottie
 difficulty: 1
 tags: [implicit, container, beginner, tap]
 summary: >
-  点击时让方块的尺寸 / 颜色 / 圆角平滑过渡。能用隐式动画解决的，就不要手写
-  AnimationController —— 更短、更不容易出错。
+  Smoothly transition a box's size / color / corner radius on tap. If an implicit
+  animation can do the job, don't hand-roll an AnimationController — it's shorter
+  and harder to get wrong.
 verifiedOn: "Flutter 3.32 / 2026-06"
-gistId: ""                   # 由 scripts/sync-gists.mjs 自动回写
+gistId: ""                   # auto-filled by scripts/sync-gists.mjs
 docs:
   - https://docs.flutter.dev/ui/animations/implicit-animations
   - https://api.flutter.dev/flutter/widgets/AnimatedContainer-class.html
 pitfalls:
-  - claim: 只有「可补间(Tween)的属性」才会动画；改 child 的类型或 key 不会触发过渡。
-    fix: 用 AnimatedSwitcher 处理「子组件整体替换」，AnimatedContainer 只管自身属性。
+  - claim: Only tweenable properties animate; changing the child's type or key won't trigger a transition.
+    fix: Use AnimatedSwitcher to swap the whole child; AnimatedContainer only animates its own properties.
     source: https://api.flutter.dev/flutter/widgets/AnimatedContainer-class.html
     confidence: official-docs
-  - claim: 首帧就给目标值不会有动画 —— 隐式动画只在「属性发生变化」时播放。
-    fix: 初始用起始值，在 build 之后（如点击/initState 后 setState）再改成目标值。
+  - claim: Setting the target value on the very first frame shows no animation — implicit animations only play when a property changes.
+    fix: Start with the initial value, then change it to the target after the first build (e.g. on tap, or setState after initState).
     source: https://docs.flutter.dev/ui/animations/implicit-animations
     confidence: official-docs
-  - claim: 为了这种简单过渡手写 AnimationController，是过度设计且容易漏 dispose。
-    fix: 简单属性过渡一律优先隐式动画族（AnimatedContainer/AnimatedOpacity/...）。
+  - claim: Hand-writing an AnimationController for a transition this simple is over-engineering and easy to leak (missing dispose).
+    fix: For simple property transitions, always reach for the implicit family first (AnimatedContainer / AnimatedOpacity / ...).
     source: author-experience
     confidence: author-experience

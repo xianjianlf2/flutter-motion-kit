@@ -1,24 +1,25 @@
 id: animated-switcher-swap
-title: AnimatedSwitcher 内容切换
+title: AnimatedSwitcher (content swap)
 category: implicit
 difficulty: 2
 tags: [switcher, fade, scale, state, key]
 summary: >
-  在新旧内容之间做淡入缩放过渡（如计数器、加载/成功状态切换）。关键是给子组件唯一 Key。
+  Fade-and-scale between old and new content (counters, loading → success states).
+  The key is giving each child a unique Key.
 verifiedOn: "Flutter 3.32 / 2026-06"
 gistId: ""
 docs:
   - https://api.flutter.dev/flutter/widgets/AnimatedSwitcher-class.html
 pitfalls:
-  - claim: 子组件不带唯一 Key 时，AnimatedSwitcher 判定为「同一个 widget」，根本不触发过渡。
-    fix: 给 child 设 ValueKey（用能区分新旧内容的值），内容变化才会被识别。
+  - claim: Without a unique Key on the child, AnimatedSwitcher treats it as the same widget and never transitions.
+    fix: Give the child a ValueKey (keyed on something that distinguishes old from new) so content changes are detected.
     source: https://api.flutter.dev/flutter/widgets/AnimatedSwitcher-class.html
     confidence: official-docs
-  - claim: 它只对「child 整体替换」生效，对 child 内部状态变化无效。
-    fix: 状态变化要体现成不同的 child（或不同 Key）。
+  - claim: It only reacts to replacing the whole child, not to state changes inside the child.
+    fix: Express state changes as a different child (or a different Key).
     source: https://api.flutter.dev/flutter/widgets/AnimatedSwitcher/transitionBuilder.html
     confidence: official-docs
-  - claim: transitionBuilder 同时作用于进入和离开，离开用的是上一个 child。
-    fix: 组合 FadeTransition/ScaleTransition 时确保对两端都成立，避免离开态错位。
+  - claim: transitionBuilder runs for both the incoming and outgoing children; the outgoing one is the previous child.
+    fix: When composing FadeTransition/ScaleTransition, make sure it holds for both ends so the exit state doesn't glitch.
     source: https://api.flutter.dev/flutter/widgets/AnimatedSwitcher/transitionBuilder.html
     confidence: official-docs

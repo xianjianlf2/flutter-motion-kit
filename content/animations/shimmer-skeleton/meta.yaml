@@ -1,29 +1,30 @@
 id: shimmer-skeleton
-title: Shimmer 骨架屏加载
+title: Shimmer skeleton loading
 category: explicit
 difficulty: 3
 tags: [shimmer, skeleton, loading, shadermask, gradient]
 summary: >
-  数据加载时用「扫光」骨架占位。单个 controller + ShaderMask 渐变扫过，比逐个 item 开控制器省。
+  Show a sweeping shimmer placeholder while data loads. A single controller +
+  a ShaderMask gradient sweep is cheaper than one controller per item.
 verifiedOn: "Flutter 3.32 / 2026-06"
 gistId: ""
 docs:
   - https://api.flutter.dev/flutter/widgets/ShaderMask-class.html
   - https://api.flutter.dev/flutter/widgets/RepaintBoundary-class.html
 pitfalls:
-  - claim: ShaderMask 扫光每帧重绘，不隔离会带动周边一起重绘，列表里尤其明显。
-    fix: 用 RepaintBoundary 包住每个骨架单元，把重绘范围钉在自身。
+  - claim: The ShaderMask sweep repaints every frame and, without isolation, drags surrounding widgets into the repaint — especially noticeable in lists.
+    fix: Wrap each skeleton unit in a RepaintBoundary to pin the repaint to itself.
     source: https://api.flutter.dev/flutter/widgets/RepaintBoundary-class.html
     confidence: official-docs
-  - claim: AnimatedBuilder 不传 child，骨架形状子树会每帧重建。
-    fix: 把骨架形状作为 child 传入，builder 里只更新渐变。
+  - claim: Not passing a child to AnimatedBuilder rebuilds the skeleton-shape subtree every frame.
+    fix: Pass the skeleton shape as the child and only update the gradient in the builder.
     source: https://api.flutter.dev/flutter/widgets/AnimatedBuilder-class.html
     confidence: official-docs
-  - claim: 漏 dispose() 会泄漏 controller 的 Ticker。
-    fix: dispose() 里 _controller.dispose()。
+  - claim: Forgetting dispose() leaks the controller's Ticker.
+    fix: Call _controller.dispose() in dispose().
     source: https://api.flutter.dev/flutter/widgets/SingleTickerProviderStateMixin-mixin.html
     confidence: official-docs
-  - claim: repeat() 在页面切到后台/不可见时仍在空转，浪费帧。
-    fix: 加载完成即停止/移除；或用 TickerMode/可见性感知控制播放。
+  - claim: repeat() keeps spinning even when the page is backgrounded / invisible, wasting frames.
+    fix: Stop or remove it once loading finishes, or gate playback with TickerMode / visibility awareness.
     source: https://api.flutter.dev/flutter/widgets/TickerMode-class.html
     confidence: official-docs

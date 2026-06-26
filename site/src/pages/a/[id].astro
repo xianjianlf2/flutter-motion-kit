@@ -10,31 +10,31 @@ export function getStaticPaths() {
 
 const { entry } = Astro.props;
 
-// 自托管预览：scripts/build-previews.mjs 把 main.dart 编译成真能跑的 Flutter web，
-// 落在 site/public/preview/<id>/。存在则内嵌运行，不依赖 DartPad / gist / token。
+// Self-hosted preview: scripts/build-previews.mjs compiles main.dart into runnable Flutter web
+// under site/public/preview/<id>/. If present, embed it directly — no DartPad / gist / token needed.
 const previewPath = fileURLToPath(new URL(`../../../public/preview/${entry.id}/index.html`, import.meta.url));
 const hasPreview = existsSync(previewPath);
 const previewUrl = `/preview/${entry.id}/`;
 
-// 「复制给 AI」的现成 prompt：代码 + 坑，让 CC/Cursor 带着避坑提示落地。
+// Ready-made "Copy for AI" prompt: code + pitfalls, so CC/Cursor land it with the gotchas in mind.
 const aiPrompt = [
-  `请在我的 Flutter 项目里加入这个「${entry.title}」动画。`,
+  `Add this "${entry.title}" animation to my Flutter project.`,
   '',
-  '代码：',
+  'Code:',
   '```dart',
   entry.code.trim(),
   '```',
   '',
-  '务必遵守以下避坑要点：',
-  ...entry.pitfalls.map((p, i) => `${i + 1}. ${p.claim} —— ${p.fix}`),
+  'Be sure to follow these pitfalls:',
+  ...entry.pitfalls.map((p, i) => `${i + 1}. ${p.claim} — ${p.fix}`),
   '',
-  `（验证于 ${entry.verifiedOn}）`,
+  `(Verified on ${entry.verifiedOn})`,
 ].join('\n');
 
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'TechArticle',
-  headline: `${entry.title} — Flutter 动画实现与避坑`,
+  headline: `${entry.title} — Flutter animation implementation & pitfalls`,
   description: entry.summary.trim(),
   about: 'Flutter animation',
   keywords: ['Flutter', 'animation', entry.category, ...(entry.tags ?? [])].join(', '),
@@ -45,54 +45,54 @@ const jsonLd = {
 
 <Base
   title={`${entry.title} — Flutter Motion Kit`}
-  description={`${entry.summary.trim()} 含 ${entry.pitfalls.length} 个避坑要点，可在线预览并一键复用。`}
+  description={`${entry.summary.trim()} ${entry.pitfalls.length} pitfalls included — preview it live and reuse in one click.`}
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </Fragment>
-  <p><a href="/">← 返回</a></p>
+  <p><a href="/">← Back</a></p>
   <h2 style="margin-bottom:4px">{entry.title}</h2>
-  <p class="verified">分类 {entry.category} · 难度 {entry.difficulty}/5 · 验证于 {entry.verifiedOn}</p>
+  <p class="verified">{entry.category} · difficulty {entry.difficulty}/5 · verified {entry.verifiedOn}</p>
   <p style="color:var(--muted)">{entry.summary}</p>
 
   {hasPreview ? (
     <div class="preview-wrap">
       <div class="preview-bar">
-        <span>▶︎ 真实运行（{entry.verifiedOn.split('/')[0].trim()} · 自托管，非录屏）</span>
-        <button class="act tiny" id="replay" title="重新加载，从头播放">↻ 重播</button>
+        <span>▶︎ Running for real ({entry.verifiedOn.split('/')[0].trim()} · self-hosted, not a recording)</span>
+        <button class="act tiny" id="replay" title="Reload and replay from the start">↻ Replay</button>
       </div>
-      <iframe class="dartpad" id="preview" src={previewUrl} title={`${entry.title} 预览`} loading="lazy"></iframe>
+      <iframe class="dartpad" id="preview" src={previewUrl} title={`${entry.title} preview`} loading="lazy"></iframe>
     </div>
   ) : entry.dartpadUrl ? (
     <iframe class="dartpad" src={entry.dartpadUrl} title="DartPad preview" loading="lazy"></iframe>
   ) : (
-    <p style="color:var(--warn)">⏳ 在线预览未就绪：运行 <code>node scripts/build-previews.mjs</code> 生成自托管预览后即可内嵌。</p>
+    <p style="color:var(--warn)">⏳ Live preview not ready: run <code>node scripts/build-previews.mjs</code> to generate the self-hosted preview, then it embeds here.</p>
   )}
 
   <div class="btnrow">
-    <button class="act primary" id="copy-ai">📋 复制给 AI（代码 + 避坑）</button>
-    <button class="act" id="copy-code">复制代码</button>
+    <button class="act primary" id="copy-ai">📋 Copy for AI (code + pitfalls)</button>
+    <button class="act" id="copy-code">Copy code</button>
   </div>
 
-  <h3>代码</h3>
+  <h3>Code</h3>
   <pre><code>{entry.code.trim()}</code></pre>
 
-  <h3>⚠️ 坑（{entry.pitfalls.length}）</h3>
+  <h3>⚠️ Pitfalls ({entry.pitfalls.length})</h3>
   {entry.pitfalls.map((p) => (
     <div class="pitfall">
       <div>{p.claim}</div>
       <div class="fix">✅ {p.fix}</div>
       <div class="src">
         <span class="conf">{p.confidence}</span>
-        {p.source?.startsWith('http') ? <> · <a href={p.source} target="_blank" rel="noopener">出处</a></> : null}
-        {p.provenBy ? <> · 测试佐证：<code>{p.provenBy}</code></> : null}
+        {p.source?.startsWith('http') ? <> · <a href={p.source} target="_blank" rel="noopener">source</a></> : null}
+        {p.provenBy ? <> · proven by test: <code>{p.provenBy}</code></> : null}
       </div>
     </div>
   ))}
 
   {entry.docs?.length ? (
     <>
-      <h3>官方文档</h3>
+      <h3>Official docs</h3>
       <ul>{entry.docs.map((d) => <li><a href={d} target="_blank" rel="noopener">{d}</a></li>)}</ul>
     </>
   ) : null}
@@ -102,12 +102,12 @@ const jsonLd = {
     const data = JSON.parse(document.getElementById('payload').textContent);
     const flash = (btn, txt) => { const o = btn.textContent; btn.textContent = txt; setTimeout(() => (btn.textContent = o), 1400); };
     document.getElementById('copy-code').addEventListener('click', (e) => {
-      navigator.clipboard.writeText(data.code).then(() => flash(e.target, '✓ 已复制代码'));
+      navigator.clipboard.writeText(data.code).then(() => flash(e.target, '✓ Code copied'));
     });
     document.getElementById('copy-ai').addEventListener('click', (e) => {
-      navigator.clipboard.writeText(data.prompt).then(() => flash(e.target, '✓ 已复制（粘进 Claude Code 即可）'));
+      navigator.clipboard.writeText(data.prompt).then(() => flash(e.target, '✓ Copied — paste into Claude Code'));
     });
-    // 重播：重载 iframe 让动画从初始状态再跑一遍
+    // Replay: reload the iframe so the animation runs again from its initial state
     const replay = document.getElementById('replay');
     const preview = document.getElementById('preview');
     if (replay && preview) replay.addEventListener('click', () => { preview.src = preview.src; });

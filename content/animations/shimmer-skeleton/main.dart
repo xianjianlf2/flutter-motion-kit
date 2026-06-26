@@ -1,5 +1,5 @@
-// ✅ 推荐：单 controller 驱动 ShaderMask 扫光，child 复用 + RepaintBoundary 隔离重绘。
-// 可直接粘进 DartPad (https://dartpad.dev) 运行。
+// ✅ Recommended: a single controller drives the ShaderMask sweep; reuse the child and isolate repaints with RepaintBoundary.
+// Paste straight into DartPad (https://dartpad.dev) to run.
 import 'package:flutter/material.dart';
 
 void main() => runApp(const _App());
@@ -23,7 +23,7 @@ class _Demo extends StatelessWidget {
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: 6,
-        // 每个骨架单元独立隔离重绘
+        // Isolate each skeleton tile's repaints independently
         itemBuilder: (_, __) => const RepaintBoundary(child: _SkeletonTile()),
       ),
     );
@@ -66,7 +66,7 @@ class _Box extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: Colors.white, // 颜色由 ShaderMask 接管
+          color: Colors.white, // the ShaderMask takes over the color
           borderRadius: BorderRadius.circular(radius),
         ),
       );
@@ -79,7 +79,8 @@ class _Shimmer extends StatefulWidget {
   State<_Shimmer> createState() => _ShimmerState();
 }
 
-class _ShimmerState extends State<_Shimmer> with SingleTickerProviderStateMixin {
+class _ShimmerState extends State<_Shimmer>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1400),
@@ -95,15 +96,20 @@ class _ShimmerState extends State<_Shimmer> with SingleTickerProviderStateMixin 
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      child: widget.child, // 骨架形状不随帧变化 -> 作为 child 复用
+      child: widget
+          .child, // the skeleton shape doesn't change per frame -> reuse it as the child
       builder: (context, child) {
-        final dx = _controller.value * 2 - 1; // -1 -> 1 扫过
+        final dx = _controller.value * 2 - 1; // sweeps from -1 -> 1
         return ShaderMask(
           blendMode: BlendMode.srcATop,
           shaderCallback: (rect) => LinearGradient(
             begin: Alignment(-1 + dx, 0),
             end: Alignment(1 + dx, 0),
-            colors: const [Color(0xFF2A2F37), Color(0xFF454C59), Color(0xFF2A2F37)],
+            colors: const [
+              Color(0xFF2A2F37),
+              Color(0xFF454C59),
+              Color(0xFF2A2F37)
+            ],
             stops: const [0.35, 0.5, 0.65],
           ).createShader(rect),
           child: child,

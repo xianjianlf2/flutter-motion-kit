@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
   schedule:
-    - cron: '0 2 1 * *' # 每月 1 号重验，及时发现 Flutter 新版的 deprecation
+    - cron: '0 2 1 * *' # re-verify on the 1st of each month to catch deprecations in new Flutter releases early
 
 jobs:
   catalog:
@@ -23,7 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
-        with: { channel: stable }
+        # Pin to the version the content is verified against (verifiedOn), so format/analyze are
+        # authoritative and deterministic. The monthly cron is what surfaces drift on newer releases.
+        with: { channel: stable, flutter-version: 3.32.0 }
       - name: Verify every snippet compiles & is idiomatic
         run: |
           set -e
@@ -38,8 +40,8 @@ jobs:
             (cd _verify && flutter build web --no-pub >/dev/null) || { echo "build: $dart"; fail=1; }
             echo "::endgroup::"
           done
-          # bad.dart 是「反面教材」：故意违反 lint（漏 dispose 等），所以只验「能编译」——
-          # 杜绝幻觉 API / 语法错误，保证站点上的对照反例真的能跑。
+          # bad.dart is a "cautionary example": it intentionally violates lint rules (missing dispose, etc.), so we only check that it compiles —
+          # this rules out hallucinated APIs / syntax errors, ensuring the counter-examples on the site actually run.
           for dart in content/animations/*/bad.dart; do
             echo "::group::$dart (build-only)"
             cp "$dart" _verify/lib/main.dart
