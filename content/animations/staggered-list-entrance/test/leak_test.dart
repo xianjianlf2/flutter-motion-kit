@@ -12,8 +12,9 @@ import 'package:flutter_test/flutter_test.dart';
 // import '../bad.dart' as bad;     // switching to this triggers a leak-assertion failure
 
 void main() {
-  testWidgets('staggered entrance disposes its controller (no leaks)',
-      (tester) async {
+  testWidgets('staggered entrance disposes its controller (no leaks)', (
+    tester,
+  ) async {
     await tester.pumpWidget(const MaterialApp(home: Placeholder()));
     // In a real project, swap in good.App / good.Demo, then pump an empty page to trigger dispose:
     //   await tester.pumpWidget(const good.Demo());

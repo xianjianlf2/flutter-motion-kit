@@ -8,10 +8,10 @@ class _App extends StatelessWidget {
   const _App();
   @override
   Widget build(BuildContext context) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData.dark(useMaterial3: true),
-        home: const _Demo(),
-      );
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData.dark(useMaterial3: true),
+    home: const _Demo(),
+  );
 }
 
 class _Demo extends StatelessWidget {
@@ -63,13 +63,13 @@ class _Box extends StatelessWidget {
   final double width, height, radius;
   @override
   Widget build(BuildContext context) => Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: Colors.white, // the ShaderMask takes over the color
-          borderRadius: BorderRadius.circular(radius),
-        ),
-      );
+    width: width,
+    height: height,
+    decoration: BoxDecoration(
+      color: Colors.white, // the ShaderMask takes over the color
+      borderRadius: BorderRadius.circular(radius),
+    ),
+  );
 }
 
 class _Shimmer extends StatefulWidget {
@@ -108,7 +108,7 @@ class _ShimmerState extends State<_Shimmer>
             colors: const [
               Color(0xFF2A2F37),
               Color(0xFF454C59),
-              Color(0xFF2A2F37)
+              Color(0xFF2A2F37),
             ],
             stops: const [0.35, 0.5, 0.65],
           ).createShader(rect),

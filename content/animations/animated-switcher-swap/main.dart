@@ -7,10 +7,8 @@ void main() => runApp(const _App());
 class _App extends StatelessWidget {
   const _App();
   @override
-  Widget build(BuildContext context) => const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: _Demo(),
-      );
+  Widget build(BuildContext context) =>
+      const MaterialApp(debugShowCheckedModeBanner: false, home: _Demo());
 }
 
 class _Demo extends StatefulWidget {

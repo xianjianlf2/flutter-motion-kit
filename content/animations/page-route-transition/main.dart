@@ -7,10 +7,8 @@ void main() => runApp(const _App());
 class _App extends StatelessWidget {
   const _App();
   @override
-  Widget build(BuildContext context) => const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: _HomePage(),
-      );
+  Widget build(BuildContext context) =>
+      const MaterialApp(debugShowCheckedModeBanner: false, home: _HomePage());
 }
 
 // Reusable transition: fade-in + a slight slide-up
@@ -20,8 +18,10 @@ Route<T> fadeSlideRoute<T>(Widget page) {
     reverseTransitionDuration: const Duration(milliseconds: 300),
     pageBuilder: (context, animation, secondaryAnimation) => page,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final curved =
-          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+      );
       return FadeTransition(
         opacity: curved,
         child: SlideTransition(

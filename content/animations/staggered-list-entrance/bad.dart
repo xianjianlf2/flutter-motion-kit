@@ -16,16 +16,18 @@ class _DemoState extends State<_Demo> with SingleTickerProviderStateMixin {
     'Sent',
     'Starred',
     'Archive',
-    'Trash'
+    'Trash',
   ];
 
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  )
-    ..addListener(
-        () => setState(() {})) // ❌ setState every frame rebuilds the whole page
-    ..forward();
+  late final AnimationController _controller =
+      AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 900),
+        )
+        ..addListener(
+          () => setState(() {}),
+        ) // ❌ setState every frame rebuilds the whole page
+        ..forward();
 
   // ❌ No dispose() — the Ticker leaks
 

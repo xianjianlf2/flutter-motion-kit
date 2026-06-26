@@ -8,10 +8,10 @@ class _App extends StatelessWidget {
   const _App();
   @override
   Widget build(BuildContext context) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(useMaterial3: true),
-        home: const _GridPage(),
-      );
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(useMaterial3: true),
+    home: const _GridPage(),
+  );
 }
 
 const _colors = [
@@ -39,7 +39,8 @@ class _GridPage extends StatelessWidget {
             GestureDetector(
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
-                    builder: (_) => _DetailPage(index: i, color: c)),
+                  builder: (_) => _DetailPage(index: i, color: c),
+                ),
               ),
               child: Hero(
                 tag: 'box-$i', // unique tag, matching the detail page

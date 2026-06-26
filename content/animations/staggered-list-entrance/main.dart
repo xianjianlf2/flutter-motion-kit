@@ -8,10 +8,10 @@ class _App extends StatelessWidget {
   const _App();
   @override
   Widget build(BuildContext context) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.teal),
-        home: const _Demo(),
-      );
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.teal),
+    home: const _Demo(),
+  );
 }
 
 class _Demo extends StatefulWidget {
@@ -28,7 +28,7 @@ class _DemoState extends State<_Demo> with SingleTickerProviderStateMixin {
     'Sent',
     'Starred',
     'Archive',
-    'Trash'
+    'Trash',
   ];
 
   late final AnimationController _controller = AnimationController(
