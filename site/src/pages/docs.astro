@@ -1,5 +1,13 @@
 ---
+import catalog from '../../../catalog.json';
 const REPO = 'https://github.com/xianjianlf2/flutter-motion-kit';
+
+// A concrete, continuously-animating entry to show the data model live, end to end.
+const demo = catalog.entries.find((e) => e.id === 'custom-painter-progress-ring')
+  || catalog.entries.find((e) => e.id === 'shimmer-skeleton')
+  || catalog.entries[0];
+const demoPitfall = demo.pitfalls[0];
+
 const confidence = [
   ['official-docs', '#3fb950', 'rgba(63,185,150,0.15)', 'Source links to api.flutter.dev or flutter.dev. Highest confidence — the framework owns the claim.'],
   ['measured', '#79c0ff', 'rgba(121,192,255,0.15)', "There's a benchmark or DevTools timeline backing the claim. Reproducible from bad.dart."],
@@ -63,6 +71,8 @@ const checklist = [
     .docgrid > aside { display:none !important; }
     .dmodel-wrap { overflow-x:auto; }
     .dmodel-wrap > div { min-width:640px; }
+    .example2 { grid-template-columns:1fr !important; }
+    .example2 > div { min-width:0; }
   }
 </style>
 </head>
@@ -92,6 +102,34 @@ const checklist = [
     <div class="mono" style="color:#4dd0e1; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-bottom:12px">// docs</div>
     <h1 style="font-size:32px; font-weight:700; letter-spacing:-0.5px; margin:0">How Flutter Motion Kit works</h1>
     <p style="font-size:14px; color:#8b949e; margin:10px 0 0; max-width:680px; line-height:1.55">A single content directory. A verifier that runs on every commit. A static catalog the site and the MCP both read from. That's the whole product.</p>
+  </div>
+</section>
+
+<!-- LIVE WORKED EXAMPLE -->
+<section style="padding:32px; border-bottom:1px solid #21262d; background:radial-gradient(700px 300px at 85% -20%, rgba(77,208,225,0.06), transparent 60%)">
+  <div style="max-width:1180px; margin:0 auto">
+    <div class="mono" style="font-size:10px; color:#7d8590; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:12px">One entry, end to end · live</div>
+    <div class="example2" style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; align-items:stretch">
+      <!-- the effect -->
+      <div style="display:flex; flex-direction:column">
+        <div class="mono" style="font-size:11px; color:#3fb950; margin-bottom:8px">▶︎ real running Flutter — {demo.title}</div>
+        <iframe src={`/preview/${demo.id}/`} title={`${demo.title} preview`} loading="lazy" style="width:100%; flex:1; min-height:300px; border:1px solid #30363d; border-radius:12px; background:#1e1e1e"></iframe>
+      </div>
+      <!-- what produced it -->
+      <div style="display:flex; flex-direction:column; gap:14px; min-width:0">
+        <p style="font-size:14px; color:#8b949e; line-height:1.6; margin:0">That preview isn't a recording — it's <code>content/animations/{demo.id}/main.dart</code> compiled to Flutter web. The same folder feeds three places:</p>
+        <div style="display:flex; flex-direction:column; gap:8px">
+          <a href={`/a/${demo.id}`} style="display:flex; align-items:center; gap:8px; font-size:13px; padding:11px 14px; background:#161b22; border:1px solid #30363d; border-radius:9px; text-decoration:none; color:#e6edf3"><span style="color:#4dd0e1">●</span> <strong style="font-weight:600">site</strong> <span class="mono" style="font-size:11px; color:#7d8590">— /a/{demo.id}</span><span style="margin-left:auto; color:#6e7681">↗</span></a>
+          <div style="display:flex; align-items:center; gap:8px; font-size:13px; padding:11px 14px; background:#161b22; border:1px solid #30363d; border-radius:9px"><span style="color:#bc8cff">●</span> <strong style="font-weight:600">MCP</strong> <span class="mono" style="font-size:11px; color:#7d8590">— get_animation("{demo.id}")</span></div>
+          <a href="/verifier" style="display:flex; align-items:center; gap:8px; font-size:13px; padding:11px 14px; background:#161b22; border:1px solid #30363d; border-radius:9px; text-decoration:none; color:#e6edf3"><span style="color:#3fb950">●</span> <strong style="font-weight:600">verifier</strong> <span class="mono" style="font-size:11px; color:#7d8590">— format / analyze / build / leak</span><span style="margin-left:auto; color:#6e7681">↗</span></a>
+        </div>
+        <div style="background:#161b22; border:1px solid #30363d; border-left:3px solid #d29922; border-radius:9px; padding:12px 14px">
+          <div style="font-size:12.5px; color:#e6edf3; line-height:1.5">⚠ {demoPitfall.claim}</div>
+          <div style="font-size:12px; color:#3fb950; margin-top:6px; line-height:1.5">✅ {demoPitfall.fix}</div>
+          <div class="mono" style="font-size:10px; color:#7d8590; margin-top:6px">{demoPitfall.confidence}</div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
