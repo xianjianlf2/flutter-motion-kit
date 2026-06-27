@@ -25,6 +25,14 @@ const checklist = [
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Docs — Flutter Motion Kit</title>
 <meta name="description" content="How Flutter Motion Kit works: a single content directory, a verifier on every commit, and a static catalog the site and MCP both read from." />
+<link rel="canonical" href="https://motion.markxian.cn/docs" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Docs — Flutter Motion Kit" />
+<meta property="og:description" content="How it works: single-source data model, the verifier, pitfall confidence levels, and how to contribute an animation." />
+<meta property="og:url" content="https://motion.markxian.cn/docs" />
+<meta property="og:image" content="https://motion.markxian.cn/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://motion.markxian.cn/og.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -48,6 +56,14 @@ const checklist = [
   .doc-body h2 { font-size:22px; font-weight:700; letter-spacing:-0.3px; margin:48px 0 16px; color:#e6edf3; }
   .doc-body h2:first-child { margin-top:0; }
   .doc-body h3 { font-size:16px; font-weight:600; margin:28px 0 10px; color:#e6edf3; }
+  @media (max-width:820px) {
+    header nav { display:none !important; }
+    .docgrid { grid-template-columns:1fr !important; gap:24px !important; }
+    .docgrid > * { min-width:0; }
+    .docgrid > aside { display:none !important; }
+    .dmodel-wrap { overflow-x:auto; }
+    .dmodel-wrap > div { min-width:640px; }
+  }
 </style>
 </head>
 <body>
@@ -80,7 +96,7 @@ const checklist = [
 </section>
 
 <section style="padding:40px 32px 80px">
-  <div style="max-width:1180px; margin:0 auto; display:grid; grid-template-columns:220px minmax(0, 1fr); gap:48px">
+  <div class="docgrid" style="max-width:1180px; margin:0 auto; display:grid; grid-template-columns:220px minmax(0, 1fr); gap:48px">
 
     <aside style="position:sticky; top:80px; align-self:start; max-height:calc(100vh - 100px); overflow:auto">
       <div class="mono" style="font-size:10px; color:#7d8590; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:12px">On this page</div>
@@ -122,7 +138,7 @@ const checklist = [
 
       <h2 id="data-model">Single-source data model</h2>
       <p>Every animation lives in <code>content/animations/&lt;id&gt;/</code>. Three files, no duplication. The site, the MCP server, and the verifier all read from the same generated <code>catalog.json</code>.</p>
-      <div style="background:#161b22; border:1px solid #30363d; border-radius:12px; padding:24px; margin:18px 0 24px">
+      <div class="dmodel-wrap" style="background:#161b22; border:1px solid #30363d; border-radius:12px; padding:24px; margin:18px 0 24px">
         <div style="display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:14px; align-items:center">
           <div style="display:flex; flex-direction:column; gap:8px">
             <div class="mono" style="font-size:10px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px">source</div>

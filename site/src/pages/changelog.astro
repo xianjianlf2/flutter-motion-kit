@@ -34,6 +34,14 @@ const groups = raw.map((g) => ({
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Changelog — Flutter Motion Kit</title>
 <meta name="description" content="What changed, and when. Every entry re-verified monthly on the latest Flutter stable." />
+<link rel="canonical" href="https://motion.markxian.cn/changelog" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Changelog — Flutter Motion Kit" />
+<meta property="og:description" content="What changed, and when — every entry re-verified monthly on the latest Flutter stable." />
+<meta property="og:url" content="https://motion.markxian.cn/changelog" />
+<meta property="og:image" content="https://motion.markxian.cn/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://motion.markxian.cn/og.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -48,6 +56,10 @@ const groups = raw.map((g) => ({
   .entry { transition:background 0.12s, border-color 0.12s; }
   .entry:hover { background:rgba(77,208,225,0.04); border-color:#30363d; }
   .entry:hover .entry-link { color:#4dd0e1; }
+  @media (max-width:680px) {
+    header nav { display:none !important; }
+    .cl-group { grid-template-columns:1fr !important; gap:8px !important; }
+  }
 </style>
 </head>
 <body>
@@ -94,7 +106,7 @@ const groups = raw.map((g) => ({
 <section style="padding:40px 32px 80px">
   <div style="max-width:920px; margin:0 auto">
     {groups.map((group) => (
-      <div style="display:grid; grid-template-columns:120px minmax(0, 1fr); gap:32px; margin-bottom:36px">
+      <div class="cl-group" style="display:grid; grid-template-columns:120px minmax(0, 1fr); gap:32px; margin-bottom:36px">
         <div>
           <div class="mono" style="font-size:13px; color:#e6edf3; font-weight:500">{group.dateLabel}</div>
           <div class="mono" style="font-size:11px; color:#7d8590; margin-top:3px">{group.weekday}</div>

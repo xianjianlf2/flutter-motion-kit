@@ -51,6 +51,14 @@ const grid = "display:grid; grid-template-columns:minmax(220px, 2fr) repeat(4, 9
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Verifier — Flutter Motion Kit</title>
 <meta name="description" content={`Every one of ${total} animations passes format, analyze, build-web and leak-test on a stable Flutter SDK, re-verified monthly.`} />
+<link rel="canonical" href="https://motion.markxian.cn/verifier" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Verifier — Flutter Motion Kit" />
+<meta property="og:description" content="Machine-verification status: every animation passes format / analyze / build-web / leak-test on a pinned Flutter SDK, re-verified monthly." />
+<meta property="og:url" content="https://motion.markxian.cn/verifier" />
+<meta property="og:image" content="https://motion.markxian.cn/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://motion.markxian.cn/og.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -80,6 +88,12 @@ const grid = "display:grid; grid-template-columns:minmax(220px, 2fr) repeat(4, 9
   details.json-drawer summary::-webkit-details-marker { display:none; }
   details.json-drawer[open] .caret { transform:rotate(90deg); }
   .caret { transition:transform 0.15s; display:inline-block; }
+  @media (max-width:820px) {
+    header nav { display:none !important; }
+    .vtable { overflow-x:auto !important; }
+    .vtable > * { min-width:800px; }
+    .why2 { grid-template-columns:1fr !important; }
+  }
 </style>
 </head>
 <body>
@@ -148,7 +162,7 @@ const grid = "display:grid; grid-template-columns:minmax(220px, 2fr) repeat(4, 9
       <span class="mono" style="font-size:11px; color:#6e7681">hover any check for the exact command</span>
     </div>
 
-    <div style="background:#161b22; border:1px solid #30363d; border-radius:12px; overflow:hidden">
+    <div class="vtable" style="background:#161b22; border:1px solid #30363d; border-radius:12px; overflow:hidden">
       <div style={`${grid}; background:#0d1117; border-bottom:1px solid #21262d`}>
         <div class="mono" style="padding:12px 16px; font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px">Animation</div>
         <div class="mono" style="padding:12px 8px; font-size:11px; color:#7d8590; text-transform:uppercase; letter-spacing:1px; text-align:center">Format</div>
@@ -192,7 +206,7 @@ const grid = "display:grid; grid-template-columns:minmax(220px, 2fr) repeat(4, 9
 </section>
 
 <section style="padding:48px 32px; background:#0d1117; border-top:1px solid #21262d">
-  <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.1fr); gap:32px; align-items:start">
+  <div class="why2" style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.1fr); gap:32px; align-items:start">
     <div>
       <div class="mono" style="color:#d29922; font-size:11px; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px">// why this matters</div>
       <h2 style="font-size:26px; font-weight:700; line-height:1.2; letter-spacing:-0.3px; margin:0 0 14px">Bad Dart compiles too.</h2>

@@ -1,0 +1,35 @@
+---
+const links = [['Playground', '/'], ['Gallery', '/gallery'], ['Verifier', '/verifier'], ['Connect', '/connect'], ['Docs', '/docs']];
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>404 — Flutter Motion Kit</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<style is:global>
+  html, body { background:#0d1117; color:#e6edf3; font-family:'Inter',system-ui,sans-serif; margin:0; height:100%; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:'JetBrains Mono',ui-monospace,Menlo,monospace; }
+  a { text-decoration:none; }
+</style>
+</head>
+<body>
+<main style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:32px; background:radial-gradient(700px 320px at 50% 0%, rgba(77,208,225,0.10), transparent 60%)">
+  <div style="text-align:center; max-width:520px">
+    <div style="width:40px; height:40px; border-radius:11px; margin:0 auto 22px; background:conic-gradient(from 230deg at 50% 50%, #4dd0e1, #3fb950, #d29922, #4dd0e1); box-shadow:0 0 0 1px #21262d inset"></div>
+    <div class="mono" style="color:#4dd0e1; font-size:13px; letter-spacing:2px">404</div>
+    <h1 style="font-size:30px; font-weight:700; letter-spacing:-0.5px; margin:10px 0 8px">This animation flew off-screen.</h1>
+    <p style="color:#8b949e; font-size:14px; line-height:1.55; margin:0 0 24px">The page you're after doesn't exist. Here's where to land instead:</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center">
+      {links.map(([label, href], i) => (
+        <a href={href} style={`font-size:13px; font-weight:600; padding:9px 16px; border-radius:8px; ${i === 0 ? 'background:#4dd0e1; color:#06121f;' : 'background:#161b22; color:#e6edf3; border:1px solid #30363d;'}`}>{label}</a>
+      ))}
+    </div>
+  </div>
+</main>
+</body>
+</html>
