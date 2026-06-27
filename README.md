@@ -2,11 +2,27 @@
 
 > A collection of **previewable** Flutter animations, each annotated with **its pitfalls (with sources and confidence)**, and reusable from **Claude Code / Cursor in one click** (MCP).
 
+<p align="center">
+  <a href="https://motion.markxian.cn"><img src="assets/demo.gif" alt="Flutter Motion Kit — preview, copy, trust" width="860"></a>
+</p>
+
+<p align="center">
+  <a href="cursor://anysphere.cursor-deeplink/mcp/install?name=flutter-motion&config=eyJ1cmwiOiJodHRwczovL21jcC5tYXJreGlhbi5jbi9tY3AifQ=="><img src="https://img.shields.io/badge/Add%20to-Cursor-000?logo=cursor&logoColor=white&style=for-the-badge" alt="Add to Cursor"></a>
+  <a href="https://insiders.vscode.dev/redirect/mcp/install?name=flutter-motion&config=%7B%22url%22%3A%22https%3A%2F%2Fmcp.markxian.cn%2Fmcp%22%7D"><img src="https://img.shields.io/badge/Add%20to-VS%20Code-007ACC?logo=visualstudiocode&logoColor=white&style=for-the-badge" alt="Add to VS Code"></a>
+  <a href="https://motion.markxian.cn"><img src="https://img.shields.io/badge/Live%20demo-motion.markxian.cn-4dd0e1?style=for-the-badge&logo=flutter&logoColor=white" alt="Live demo"></a>
+</p>
+
 [![developers connected](https://img.shields.io/badge/dynamic/json?url=https://mcp.markxian.cn/stats&query=$.connections&label=devs%20connected&color=brightgreen)](https://motion.markxian.cn)
 [![animations](https://img.shields.io/badge/dynamic/json?url=https://mcp.markxian.cn/stats&query=$.animations&label=animations&color=blue)](https://motion.markxian.cn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **🎛 Live interactive playground: [motion.markxian.cn](https://motion.markxian.cn)** · **📚 Verified catalog: [motion.markxian.cn/gallery](https://motion.markxian.cn/gallery)**
+
+**Claude Code** — one line:
+
+```bash
+claude mcp add --transport http flutter-motion https://mcp.markxian.cn/mcp
+```
 
 ## One-click connect (remote MCP · zero install)
 
