@@ -52,6 +52,7 @@
   .like:hover { border-color:#ff7b72; color:#ff7b72; }
   .like.on { color:#ff7b72; border-color:#ff7b72; background:rgba(255,123,114,0.10); }
   .like .lc { font-family:'JetBrains Mono',monospace; }
+  .rank { position:absolute; top:8px; right:10px; font-size:10px; padding:2px 8px; border-radius:999px; background:rgba(255,123,114,0.16); color:#ff7b72; border:1px solid rgba(255,123,114,0.4); pointer-events:none; }
   .badge { font-size:11px; padding:2px 8px; border-radius:999px; background:var(--border2); color:var(--muted); border:1px solid var(--border); }
   iframe.preview { width:100%; height:520px; border:1px solid var(--border); border-radius:12px; background:#1e1e1e; }
   pre.code { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; overflow:auto; font-size:12.5px; line-height:1.65; margin:0; min-width:0; }
@@ -103,7 +104,7 @@ const MCP = ORIGIN + '/mcp';
 const CAT_COLOR = { implicit:'#4dd0e1', explicit:'#3fb950', hero:'#d29922', staggered:'#bc8cff', physics:'#ff7b72', 'custom-painter':'#79c0ff', 'rive-lottie':'#f0883e' };
 const esc = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const HOVER = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
-let CATALOG = [], CATS = [], FILTER = 'all', Q = '';
+let CATALOG = [], CATS = [], FILTER = 'all', Q = '', SORT = 'popular';
 let LIKES = {};
 const LIKED = new Set(JSON.parse(localStorage.getItem('fmk-liked') || '[]'));
 
@@ -135,7 +136,13 @@ function toggleLike(id) {
     .then((r) => r.json()).then((d) => { if (typeof d.count === 'number') { LIKES[id] = d.count; applyLikes(); } }).catch(() => {});
 }
 function loadLikes() {
-  fetch(ORIGIN + '/likes').then((r) => r.json()).then((d) => { if (d.likes) { LIKES = d.likes; applyLikes(); } }).catch(() => {});
+  fetch(ORIGIN + '/likes').then((r) => r.json()).then((d) => {
+    if (!d.likes) return;
+    LIKES = d.likes;
+    // re-sort the home grid now that real counts are in (only when on the popular-sorted home)
+    if (SORT === 'popular' && !location.hash.startsWith('#/a/')) renderHome();
+    else applyLikes();
+  }).catch(() => {});
 }
 
 const app = document.getElementById('app');
@@ -170,8 +177,9 @@ function aiPrompt(e){
 
 function renderHome(){
   const q = Q.trim().toLowerCase();
-  const list = CATALOG.filter(e => (FILTER==='all'||e.category===FILTER)
+  let list = CATALOG.filter(e => (FILTER==='all'||e.category===FILTER)
     && (!q || e.title.toLowerCase().includes(q) || e.summary.toLowerCase().includes(q) || (e.tags||[]).some(t=>t.includes(q))));
+  if (SORT === 'popular') list = [...list].sort((a,b) => (LIKES[b.id]||0)-(LIKES[a.id]||0) || a.difficulty-b.difficulty || a.id.localeCompare(b.id));
   const totalPitfalls = CATALOG.reduce((a,e)=>a+e.pitfalls.length,0);
   app.innerHTML = `
     <section class="hero-bg" style="padding:64px 0 40px; border-bottom:1px solid var(--border2)">
@@ -200,13 +208,18 @@ function renderHome(){
         <span class="chip" data-cat="all" aria-pressed="${FILTER==='all'}">all</span>
         ${CATS.map(c=>`<span class="chip mono" data-cat="${c}" aria-pressed="${FILTER===c}">${c}</span>`).join('')}
       </div>
-      <div style="margin-left:auto; font-size:12px; color:var(--muted2)">${list.length} of ${CATALOG.length}</div>
+      <div style="display:flex; gap:6px; margin-left:auto; align-items:center">
+        <span class="chip" data-sort="popular" aria-pressed="${SORT==='popular'}">🔥 popular</span>
+        <span class="chip" data-sort="default" aria-pressed="${SORT==='default'}">default</span>
+        <span style="font-size:12px; color:var(--muted2); margin-left:6px">${list.length}/${CATALOG.length}</span>
+      </div>
     </div></section>
     <section style="padding:20px 0 80px"><div class="wrap" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:18px">
-      ${list.map(e=>{const c=CAT_COLOR[e.category]||'#8b949e'; return `
+      ${list.map((e,idx)=>{const c=CAT_COLOR[e.category]||'#8b949e'; const rank = SORT==='popular' && idx<3 && (LIKES[e.id]||0)>0; return `
         <a class="card" href="#/a/${e.id}">
           <div class="cardprev" data-id="${e.id}" style="background:${c}1a">
             <span class="cardprev-cat mono" style="color:${c}">${e.category}</span>
+            ${rank ? `<span class="rank mono">🔥 #${idx+1}</span>` : ''}
             <button class="playbtn">▶ preview</button>
           </div>
           <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px">
@@ -228,7 +241,8 @@ function renderHome(){
   document.getElementById('add-vscode').href = 'https://insiders.vscode.dev/redirect/mcp/install?name=flutter-motion&config=' + encodeURIComponent(cfg);
   document.getElementById('add-cc').onclick = () => copy('claude mcp add --transport http flutter-motion ' + MCP, 'Claude Code command copied');
   // filters
-  app.querySelectorAll('.chip').forEach(c => c.onclick = () => { FILTER = c.dataset.cat; renderHome(); });
+  app.querySelectorAll('.chip[data-cat]').forEach(c => c.onclick = () => { FILTER = c.dataset.cat; renderHome(); });
+  app.querySelectorAll('.chip[data-sort]').forEach(c => c.onclick = () => { SORT = c.dataset.sort; renderHome(); });
   const s = document.getElementById('search');
   s.oninput = () => { Q = s.value; const pos = s.selectionStart; renderHome(); const ns = document.getElementById('search'); ns.focus(); ns.setSelectionRange(pos,pos); };
   // card previews: load on hover (desktop) or tap the ▶ button (mobile), without navigating
