@@ -43,6 +43,15 @@
   .card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; display:flex; flex-direction:column; gap:10px; min-height:170px; transition:transform .18s, border-color .18s; text-decoration:none; color:inherit; }
   .card:hover { transform:translateY(-2px); border-color:var(--accent); }
   .card .accent { height:3px; border-radius:3px; margin:-4px -4px 4px; }
+  .cardprev { position:relative; height:150px; border-radius:8px; border:1px solid var(--border2); overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .cardprev iframe { width:100%; height:100%; border:0; background:#1e1e1e; display:block; }
+  .cardprev-cat { position:absolute; top:8px; left:10px; font-size:10px; text-transform:lowercase; opacity:.85; pointer-events:none; }
+  .playbtn { font-size:11px; padding:6px 13px; border-radius:999px; border:1px solid var(--border); background:rgba(13,17,23,0.72); color:var(--text); cursor:pointer; font-family:'JetBrains Mono',monospace; }
+  .playbtn:hover { border-color:var(--accent); color:var(--accent); }
+  .like { display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:4px 10px; border-radius:999px; border:1px solid var(--border); background:var(--panel); color:var(--muted); cursor:pointer; transition:color .12s, border-color .12s, background .12s; }
+  .like:hover { border-color:#ff7b72; color:#ff7b72; }
+  .like.on { color:#ff7b72; border-color:#ff7b72; background:rgba(255,123,114,0.10); }
+  .like .lc { font-family:'JetBrains Mono',monospace; }
   .badge { font-size:11px; padding:2px 8px; border-radius:999px; background:var(--border2); color:var(--muted); border:1px solid var(--border); }
   iframe.preview { width:100%; height:520px; border:1px solid var(--border); border-radius:12px; background:#1e1e1e; }
   pre.code { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; overflow:auto; font-size:12.5px; line-height:1.65; margin:0; min-width:0; }
@@ -89,10 +98,45 @@
 <div id="toast" class="toast mono" style="display:none; position:fixed; bottom:24px; left:50%; background:var(--panel); border:1px solid var(--accent); color:var(--accent); padding:8px 14px; border-radius:8px; font-size:12px; z-index:50; box-shadow:0 12px 40px -10px rgba(77,208,225,0.35)"></div>
 
 <script>
-const MCP = 'https://mcp.markxian.cn/mcp';
+const ORIGIN = 'https://mcp.markxian.cn';
+const MCP = ORIGIN + '/mcp';
 const CAT_COLOR = { implicit:'#4dd0e1', explicit:'#3fb950', hero:'#d29922', staggered:'#bc8cff', physics:'#ff7b72', 'custom-painter':'#79c0ff', 'rive-lottie':'#f0883e' };
 const esc = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const HOVER = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 let CATALOG = [], CATS = [], FILTER = 'all', Q = '';
+let LIKES = {};
+const LIKED = new Set(JSON.parse(localStorage.getItem('fmk-liked') || '[]'));
+
+function loadPreview(el, id) {
+  if (el.dataset.loaded) return;
+  el.dataset.loaded = '1';
+  el.innerHTML = '<iframe src="/preview/' + id + '/" title="preview" loading="lazy"></iframe>';
+}
+function applyLikes() {
+  document.querySelectorAll('.like').forEach((b) => {
+    const id = b.dataset.id;
+    b.classList.toggle('on', LIKED.has(id));
+    const lc = b.querySelector('.lc'); if (lc) lc.textContent = LIKES[id] ?? 0;
+  });
+}
+function wireLikes() {
+  document.querySelectorAll('.like').forEach((b) => {
+    b.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); toggleLike(b.dataset.id); };
+  });
+  applyLikes();
+}
+function toggleLike(id) {
+  const liked = LIKED.has(id);
+  if (liked) { LIKED.delete(id); LIKES[id] = Math.max(0, (LIKES[id] ?? 1) - 1); }
+  else { LIKED.add(id); LIKES[id] = (LIKES[id] ?? 0) + 1; }
+  localStorage.setItem('fmk-liked', JSON.stringify([...LIKED]));
+  applyLikes();
+  fetch(ORIGIN + '/like/' + encodeURIComponent(id), { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ op: liked ? 'unlike' : 'like' }) })
+    .then((r) => r.json()).then((d) => { if (typeof d.count === 'number') { LIKES[id] = d.count; applyLikes(); } }).catch(() => {});
+}
+function loadLikes() {
+  fetch(ORIGIN + '/likes').then((r) => r.json()).then((d) => { if (d.likes) { LIKES = d.likes; applyLikes(); } }).catch(() => {});
+}
 
 const app = document.getElementById('app');
 const toast = document.getElementById('toast');
@@ -159,20 +203,23 @@ function renderHome(){
       <div style="margin-left:auto; font-size:12px; color:var(--muted2)">${list.length} of ${CATALOG.length}</div>
     </div></section>
     <section style="padding:20px 0 80px"><div class="wrap" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:18px">
-      ${list.map(e=>`
+      ${list.map(e=>{const c=CAT_COLOR[e.category]||'#8b949e'; return `
         <a class="card" href="#/a/${e.id}">
-          <div class="accent" style="background:${CAT_COLOR[e.category]||'#8b949e'}"></div>
+          <div class="cardprev" data-id="${e.id}" style="background:${c}1a">
+            <span class="cardprev-cat mono" style="color:${c}">${e.category}</span>
+            <button class="playbtn">▶ preview</button>
+          </div>
           <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px">
             <h3 style="font-size:15px; font-weight:600; margin:0">${esc(e.title)}</h3>
             <span class="mono" style="font-size:10px; color:var(--muted2); flex-shrink:0">${'●'.repeat(e.difficulty)}<span style="color:var(--border)">${'●'.repeat(5-e.difficulty)}</span></span>
           </div>
           <p style="font-size:12.5px; color:var(--muted); margin:0; line-height:1.45; flex:1">${esc(e.summary.trim())}</p>
           <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center">
-            <span class="badge mono" style="color:${CAT_COLOR[e.category]||'#8b949e'}">${e.category}</span>
+            <span class="badge mono" style="color:${c}">${e.category}</span>
             <span class="badge">⚠ ${e.pitfalls.length}</span>
-            <span class="mono" style="margin-left:auto; font-size:11px; color:var(--accent)">▶ live preview</span>
+            <button class="like" data-id="${e.id}" style="margin-left:auto" title="Like this animation">♥ <span class="lc">0</span></button>
           </div>
-        </a>`).join('')}
+        </a>`}).join('')}
     </div></section>`;
 
   // wire install buttons
@@ -184,6 +231,15 @@ function renderHome(){
   app.querySelectorAll('.chip').forEach(c => c.onclick = () => { FILTER = c.dataset.cat; renderHome(); });
   const s = document.getElementById('search');
   s.oninput = () => { Q = s.value; const pos = s.selectionStart; renderHome(); const ns = document.getElementById('search'); ns.focus(); ns.setSelectionRange(pos,pos); };
+  // card previews: load on hover (desktop) or tap the ▶ button (mobile), without navigating
+  app.querySelectorAll('.cardprev').forEach(el => {
+    const id = el.dataset.id;
+    const load = () => loadPreview(el, id);
+    if (HOVER) el.addEventListener('mouseenter', load, { once: true });
+    const pb = el.querySelector('.playbtn');
+    if (pb) pb.addEventListener('click', (ev) => { ev.preventDefault(); ev.stopPropagation(); load(); });
+  });
+  wireLikes();
   loadDevs();
 }
 
@@ -200,7 +256,10 @@ function renderDetail(id){
           <h1 style="font-size:28px; font-weight:700; margin:8px 0 0; letter-spacing:-0.5px">${esc(e.title)}</h1>
           <p style="font-size:14px; color:var(--muted); margin:6px 0 0; max-width:620px; line-height:1.5">${esc(e.summary.trim())}</p>
         </div>
-        <button class="act primary" id="copy-ai" style="flex-shrink:0">📋 Copy for AI (code + pitfalls)</button>
+        <div style="display:flex; gap:10px; flex-shrink:0; align-items:center">
+          <button class="like" data-id="${e.id}" style="padding:8px 14px; font-size:13px" title="Like this animation">♥ <span class="lc">0</span></button>
+          <button class="act primary" id="copy-ai">📋 Copy for AI (code + pitfalls)</button>
+        </div>
       </div>
     </div></section>
     <section style="padding:24px 0"><div class="wrap">
@@ -234,6 +293,7 @@ function renderDetail(id){
   document.getElementById('replay').onclick = () => { pv.src = pv.src; };
   document.getElementById('copy-code').onclick = () => copy(e.code, 'Code copied');
   document.getElementById('copy-ai').onclick = () => copy(aiPrompt(e), 'Copied — paste into your AI assistant');
+  wireLikes();
   window.scrollTo(0,0);
 }
 
@@ -246,7 +306,7 @@ function loadDevs(){
 function route(){ const m = location.hash.match(/^#\/a\/(.+)$/); if(m) renderDetail(decodeURIComponent(m[1])); else renderHome(); }
 window.addEventListener('hashchange', route);
 
-fetch('/api/animations.json').then(r=>r.json()).then(d=>{ CATALOG = d.entries; CATS = d.categories; route(); })
+fetch('/api/animations.json').then(r=>r.json()).then(d=>{ CATALOG = d.entries; CATS = d.categories; route(); loadLikes(); })
   .catch(()=>{ app.innerHTML = '<div class="wrap" style="padding:80px 32px; color:var(--warn)">Failed to load catalog.</div>'; });
 </script>
 

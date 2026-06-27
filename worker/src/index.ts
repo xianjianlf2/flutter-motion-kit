@@ -2,6 +2,8 @@
 // Routes:
 //   POST /mcp     Streamable HTTP MCP (JSON mode, stateless and read-only)
 //   GET  /stats   connection count (for the homepage's live badge)
+//   GET  /likes   per-animation like counts (for the homepage hearts)
+//   POST /like/<id>  toggle a like ({op:'like'|'unlike'}) -> new count
 //   GET  /        service info + one-line setup hint
 import catalog from '../../catalog.json';
 import { dispatch } from '../../mcp/dist/rpc.js';
@@ -55,6 +57,27 @@ export default {
         },
         tools: ['search_flutter_animation', 'get_animation', 'list_pitfalls', 'list_categories'],
       });
+    }
+
+    if (url.pathname === '/likes') {
+      const counts: Record<string, number> = {};
+      await Promise.all(CATALOG.entries.map(async (e) => {
+        counts[e.id] = Number((await env.STATS.get('like:' + e.id)) ?? '0');
+      }));
+      return json({ likes: counts });
+    }
+
+    if (url.pathname.startsWith('/like/')) {
+      if (req.method !== 'POST') return json({ error: 'use POST' }, { status: 405 });
+      const id = decodeURIComponent(url.pathname.slice('/like/'.length));
+      if (!CATALOG.entries.some((e) => e.id === id)) return json({ error: 'unknown id' }, { status: 404 });
+      let op = 'like';
+      try { const b = (await req.json()) as { op?: string }; if (b?.op) op = String(b.op); } catch {}
+      const key = 'like:' + id;
+      const cur = Number((await env.STATS.get(key)) ?? '0');
+      const next = Math.max(0, cur + (op === 'unlike' ? -1 : 1));
+      await env.STATS.put(key, String(next));
+      return json({ id, count: next });
     }
 
     if (url.pathname === '/mcp') {
