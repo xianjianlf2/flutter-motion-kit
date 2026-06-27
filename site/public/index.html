@@ -3,1112 +3,233 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flutter Motion Kit — Interactive Playground</title>
-<meta name="description" content="实时预览 + 可调参数的 Flutter 动画 playground：拖动控件即时看到效果，代码同步高亮，每条都带可追溯的坑。">
+<title>Flutter Motion Kit — previewable Flutter animations</title>
+<meta name="description" content="Machine-verified Flutter animations you can preview live (real running Flutter web), each with sourced pitfalls, and reuse from Claude Code / Cursor via MCP.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
 <style>
-  html, body { background:#0d1117; color:#e6edf3; font-family: 'Inter', system-ui, sans-serif; }
-  * { -webkit-font-smoothing: antialiased; }
-  .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
-  /* Scrollbars */
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: #0d1117; }
-  ::-webkit-scrollbar-thumb { background: #21262d; border-radius: 6px; border: 2px solid #0d1117; }
-  ::-webkit-scrollbar-thumb:hover { background: #30363d; }
-  /* Range slider */
-  input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; height: 18px; width: 100%; }
-  input[type=range]::-webkit-slider-runnable-track { height: 4px; background: #21262d; border-radius: 2px; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #4dd0e1; margin-top: -5px; cursor: pointer; box-shadow: 0 0 0 3px rgba(77,208,225,0.15); transition: box-shadow 0.15s; }
-  input[type=range]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 5px rgba(77,208,225,0.22); }
-  input[type=range]::-moz-range-track { height: 4px; background: #21262d; border-radius: 2px; }
-  input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #4dd0e1; border: none; cursor: pointer; }
-  /* Color input */
-  input[type=color] { -webkit-appearance: none; appearance: none; border: 1px solid #30363d; border-radius: 6px; width: 100%; height: 32px; background: transparent; padding: 2px; cursor: pointer; }
-  input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
-  input[type=color]::-webkit-color-swatch { border: none; border-radius: 4px; }
-  /* Select */
-  select { background: #161b22; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px; padding: 6px 28px 6px 10px; font-size: 12px; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237d8590' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>"); background-repeat: no-repeat; background-position: right 8px center; }
-  select:focus, input:focus { outline: none; border-color: #4dd0e1; }
-  /* Toggle */
-  .toggle { width: 32px; height: 18px; background: #21262d; border-radius: 9px; position: relative; cursor: pointer; transition: background 0.15s; flex-shrink: 0; }
-  .toggle.on { background: #4dd0e1; }
-  .toggle-knob { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #e6edf3; border-radius: 50%; transition: transform 0.15s; }
-  .toggle.on .toggle-knob { transform: translateX(14px); background: #0d1117; }
-  /* Highlight flash for code tokens */
-  @keyframes tokenFlash {
-    0% { background: rgba(255,224,102,0.30); }
-    100% { background: rgba(255,224,102,0); }
-  }
-  .tok-flash { animation: tokenFlash 0.7s ease-out; }
-  /* Card hover preview lift */
-  .card { transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease; }
-  .card:hover { transform: translateY(-2px); border-color: #4dd0e1 !important; }
-  /* Subtle radial bg for hero */
-  .hero-bg {
-    background:
-      radial-gradient(900px 360px at 12% -10%, rgba(77,208,225,0.10), transparent 60%),
-      radial-gradient(700px 300px at 95% 10%, rgba(63,185,150,0.06), transparent 60%);
-  }
-  /* Pulse for live badge */
-  @keyframes livepulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
-  .live-dot { animation: livepulse 1.6s infinite; }
-  /* Toast */
-  @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .toast { animation: toastIn 0.18s ease-out; }
+  :root { --bg:#0d1117; --panel:#161b22; --border:#30363d; --border2:#21262d; --text:#e6edf3; --muted:#8b949e; --muted2:#6e7681; --accent:#4dd0e1; --good:#3fb950; --warn:#d29922; }
+  * { box-sizing:border-box; }
+  html, body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; margin:0; -webkit-font-smoothing:antialiased; }
+  a { color:inherit; }
+  .mono { font-family:'JetBrains Mono',ui-monospace,Menlo,monospace; }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:6px; border:2px solid var(--bg); }
+  ::-webkit-scrollbar-thumb:hover { background:var(--border); }
+  @keyframes livepulse { 0%,100% { opacity:1 } 50% { opacity:0.35 } }
+  .live-dot { animation:livepulse 1.6s infinite; }
+  @keyframes toastIn { from { opacity:0; transform:translateY(8px) translateX(-50%) } to { opacity:1; transform:translateY(0) translateX(-50%) } }
+  .toast { animation:toastIn 0.18s ease-out; }
+  .navlink { transition:color .12s; text-decoration:none; }
+  .navlink:hover { color:var(--text) !important; }
+  .hero-bg { background:radial-gradient(900px 360px at 12% -10%, rgba(77,208,225,0.10), transparent 60%), radial-gradient(700px 300px at 95% 10%, rgba(63,185,150,0.06), transparent 60%); }
+  .act { cursor:pointer; font-size:13px; font-weight:600; padding:9px 16px; border-radius:8px; border:1px solid var(--border); background:var(--panel); color:var(--text); text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:transform .12s, border-color .12s; }
+  .act:hover { transform:translateY(-1px); border-color:var(--accent); }
+  .act.primary { background:var(--accent); color:#06121f; border:none; }
+  .chip { cursor:pointer; font-size:12px; padding:5px 11px; border-radius:999px; background:var(--panel); border:1px solid var(--border); color:var(--muted); text-transform:lowercase; }
+  .chip[aria-pressed=true] { color:var(--accent); border-color:var(--accent); background:rgba(77,208,225,0.10); }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; display:flex; flex-direction:column; gap:10px; min-height:170px; transition:transform .18s, border-color .18s; text-decoration:none; color:inherit; }
+  .card:hover { transform:translateY(-2px); border-color:var(--accent); }
+  .card .accent { height:3px; border-radius:3px; margin:-4px -4px 4px; }
+  .badge { font-size:11px; padding:2px 8px; border-radius:999px; background:var(--border2); color:var(--muted); border:1px solid var(--border); }
+  iframe.preview { width:100%; height:520px; border:1px solid var(--border); border-radius:12px; background:#1e1e1e; }
+  pre.code { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; overflow:auto; font-size:12.5px; line-height:1.65; margin:0; }
+  .pitfall { padding:14px 16px; border:1px solid var(--border); border-left:3px solid var(--warn); border-radius:8px; margin:10px 0; background:var(--panel); }
+  .pitfall .fix { color:var(--good); margin-top:6px; font-size:13px; }
+  .pitfall .src { color:var(--muted); font-size:12px; margin-top:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .conf { font-size:11px; padding:1px 8px; border-radius:999px; border:1px solid var(--border); }
+  h1.hl { font-size:44px; line-height:1.05; font-weight:700; letter-spacing:-1px; margin:0; max-width:820px; }
+  .wrap { max-width:1200px; margin:0 auto; padding:0 32px; }
 </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.3.1",
-    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
-    "react/jsx-dev-runtime": "https://esm.sh/react@18.3.1/jsx-dev-runtime",
-    "react-dom": "https://esm.sh/react-dom@18.3.1",
-    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-    "framer-motion": "https://esm.sh/framer-motion@11.18.0?external=react,react-dom"
-  }
-}
-</script>
 </head>
 <body>
-<div id="root"></div>
-<script type="module">
-import React from 'react';
-import * as ReactDOMClient from 'react-dom/client';
-// 子组件 / 类方法里到处用全局 React.createElement，挂到 window 上供它们引用
-window.React = React;
 
+<header style="position:sticky; top:0; z-index:20; backdrop-filter:blur(8px); background:rgba(13,17,23,0.85); border-bottom:1px solid var(--border2); padding:12px 32px; display:flex; align-items:center; gap:16px">
+  <a href="#/" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit">
+    <div style="width:26px; height:26px; border-radius:7px; background:conic-gradient(from 230deg at 50% 50%, #4dd0e1, #3fb950, #d29922, #4dd0e1); box-shadow:0 0 0 1px #21262d inset"></div>
+    <div style="display:flex; flex-direction:column; line-height:1">
+      <span style="font-size:13px; font-weight:600">Flutter Motion Kit</span>
+      <span class="mono" style="font-size:10px; color:var(--muted2); margin-top:2px">v3.32.0</span>
+    </div>
+  </a>
+  <nav style="display:flex; gap:18px; margin-left:24px; font-size:13px">
+    <a href="/gallery" class="navlink" style="color:var(--muted)">Gallery</a>
+    <a href="/docs" class="navlink" style="color:var(--muted)">Docs</a>
+    <a href="/verifier" class="navlink" style="color:var(--muted)">Verifier</a>
+    <a href="/changelog" class="navlink" style="color:var(--muted)">Changelog</a>
+  </nav>
+  <div style="margin-left:auto; display:flex; gap:8px; align-items:center">
+    <a href="/connect" class="act" style="padding:6px 12px; font-size:12px">Connect</a>
+  </div>
+</header>
 
-class Component extends React.Component {
-  constructor(props) {
-    super(props);
-    // Build initial param state from entries
-    const data = this.getData();
-    const paramValues = {};
-    data.forEach(e => {
-      paramValues[e.id] = {};
-      e.params.forEach(p => { paramValues[e.id][p.key] = p.default; });
-    });
-    this.state = {
-      view: 'gallery',           // 'gallery' | 'detail'
-      selectedId: null,
-      search: '',
-      category: 'all',
-      paramValues,
-      replayKey: {},             // per-entry replay counter
-      flashKey: {},              // `${id}-${param}` -> timestamp for code-token highlight
-      copyToast: null,
-      devsConnected: 1248,
-      fmReady: false,
-    };
-    this._highlightTimers = {};
+<main id="app"><div class="wrap mono" style="padding:80px 32px; color:var(--muted2)">Loading catalog…</div></main>
+
+<div id="toast" class="toast mono" style="display:none; position:fixed; bottom:24px; left:50%; background:var(--panel); border:1px solid var(--accent); color:var(--accent); padding:8px 14px; border-radius:8px; font-size:12px; z-index:50; box-shadow:0 12px 40px -10px rgba(77,208,225,0.35)"></div>
+
+<script>
+const MCP = 'https://mcp.markxian.cn/mcp';
+const CAT_COLOR = { implicit:'#4dd0e1', explicit:'#3fb950', hero:'#d29922', staggered:'#bc8cff', physics:'#ff7b72', 'custom-painter':'#79c0ff', 'rive-lottie':'#f0883e' };
+const esc = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let CATALOG = [], CATS = [], FILTER = 'all', Q = '';
+
+const app = document.getElementById('app');
+const toast = document.getElementById('toast');
+let _tt;
+function flash(msg){ toast.textContent = '✓ ' + msg; toast.style.display='block'; clearTimeout(_tt); _tt=setTimeout(()=>toast.style.display='none',1600); }
+function copy(text, label){ navigator.clipboard.writeText(text).then(()=>flash(label)).catch(()=>{}); }
+
+// Light Dart syntax tinting
+function tintDart(src){
+  const re = /(\/\/[^\n]*)|('[^'\n]*'|"[^"\n]*")|(\b(?:final|const|return|class|extends|with|new|void|if|else|for|var|late|true|false|null|this|super|override|import|as)\b)|(\b(?:int|double|String|bool|List|Map|Offset|Duration|Color|Colors|Curves|BoxDecoration|BorderRadius|SizedBox|Container|Material|Widget|Tween|CurveTween|CurvedAnimation|Interval|FadeTransition|SlideTransition|RotationTransition|ScaleTransition|SizeTransition|AnimationController|Animation|Hero|PageRouteBuilder|Navigator|SpringDescription|SpringSimulation|Transform|Matrix4|AnimatedBuilder|AnimatedContainer|AnimatedSize|AnimatedList|Dismissible|CustomPainter|CustomPaint|Canvas|Size|Paint|PaintingStyle|StrokeCap|GlobalKey|ScrollController|CustomScrollView|SliverAppBar|FlexibleSpaceBar|SliverList|DraggableScrollableSheet|GestureDetector|State|StatefulWidget|StatelessWidget|MaterialApp|Scaffold|BuildContext|ShaderMask)\b)|(\b\d+(?:\.\d+)?\b)/g;
+  let out='', last=0, m;
+  const C = { c1:'#7d8590', c2:'#a5d6ff', c3:'#ff7b72', c4:'#79c0ff', c5:'#f0883e' };
+  while((m=re.exec(src))!==null){
+    if(m.index>last) out += esc(src.slice(last,m.index));
+    const col = m[1]?C.c1 : m[2]?C.c2 : m[3]?C.c3 : m[4]?C.c4 : C.c5;
+    out += '<span style="color:'+col+'">'+esc(m[0])+'</span>';
+    last = re.lastIndex;
   }
-
-  componentDidMount() {
-    // Load framer-motion as ESM
-    import('framer-motion').then(mod => {
-      this.fm = mod;
-      this.setState({ fmReady: true });
-    }).catch(err => {
-      console.error('framer-motion load failed', err);
-    });
-    // Animate "developers connected" badge
-    this._devsTimer = setInterval(() => {
-      this.setState(s => ({
-        devsConnected: Math.max(800, s.devsConnected + Math.floor((Math.random() - 0.45) * 7))
-      }));
-    }, 2200);
-    // Auto-loop every example so previews keep animating on their own (no need to click Replay)
-    this._autoTimer = setInterval(() => {
-      this.setState(s => {
-        const rk = { ...s.replayKey };
-        this.getData().forEach(e => { rk[e.id] = (rk[e.id] || 0) + 1; });
-        return { replayKey: rk };
-      });
-    }, 2600);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this._devsTimer);
-    clearInterval(this._autoTimer);
-  }
-
-  // ---------- Data ----------
-  getData() {
-    if (this._data) return this._data;
-    this._data = [
-      {
-        id: 'animated-container',
-        title: 'AnimatedContainer',
-        category: 'implicit',
-        difficulty: 1,
-        tags: ['box', 'morph', 'beginner'],
-        summary: 'The fastest way to animate size, color, padding or shape — Flutter tweens the difference on every property change.',
-        verifiedOn: 'Flutter 3.32 / 2026-06',
-        codeTemplate:
-`AnimatedContainer(
-  duration: const Duration(milliseconds: {{duration}}),
-  curve: Curves.{{curve}},
-  width: {{size}},
-  height: {{size}},
-  decoration: BoxDecoration(
-    color: {{color}},
-    borderRadius: BorderRadius.circular({{radius}}),
-  ),
-  child: const SizedBox.expand(),
-)`,
-        params: [
-          { key: 'duration', label: 'Duration', unit: 'ms', type: 'slider', min: 100, max: 1500, step: 50, default: 600 },
-          { key: 'curve', label: 'Curve', type: 'select', options: ['easeInOutCubic','elasticOut','bounceOut','linear'], default: 'easeInOutCubic' },
-          { key: 'size', label: 'Size', unit: 'px', type: 'slider', min: 40, max: 200, step: 4, default: 120 },
-          { key: 'color', label: 'Color', type: 'color', default: '#4dd0e1' },
-          { key: 'radius', label: 'Corner radius', unit: 'px', type: 'slider', min: 0, max: 100, step: 2, default: 16 },
-        ],
-        pitfalls: [
-          { claim: 'AnimatedContainer rebuilds its subtree every animation frame.', fix: 'Hoist the child into a `const` widget or pass it via `child:` so its element is reused — only the decoration interpolates.', source: 'https://api.flutter.dev/flutter/widgets/AnimatedContainer-class.html', confidence: 'official-docs' },
-          { claim: 'A null → value transition jumps without tweening.', fix: 'Provide an initial concrete value (e.g. start at width 0) on the first build so AnimatedContainer has something to interpolate from.', source: 'https://github.com/flutter/flutter/issues/82253', confidence: 'github-issue' },
-          { claim: 'It cannot animate between two BoxDecorations of different runtime types.', fix: 'Keep both ends as the same decoration class — switch from BoxDecoration→ShapeDecoration causes an instant snap.', source: 'measured in flutter_test 3.32', confidence: 'measured' },
-        ],
-      },
-      {
-        id: 'explicit-rotation',
-        title: 'Explicit Rotation Controller',
-        category: 'explicit',
-        difficulty: 2,
-        tags: ['controller', 'tween', 'rotation'],
-        summary: 'Drive a continuous rotation with AnimationController + Tween — full control over play / pause / direction.',
-        verifiedOn: 'Flutter 3.32 / 2026-06',
-        codeTemplate:
-`final controller = AnimationController(
-  vsync: this,
-  duration: Duration(milliseconds: {{duration}}),
-)..repeat(reverse: {{reverse}});
-
-final tween = Tween<double>(begin: 0, end: {{turns}})
-    .chain(CurveTween(curve: Curves.{{curve}}));
-
-RotationTransition(
-  turns: controller.drive(tween),
-  child: Container(width: 96, height: 96, color: {{color}}),
-)`,
-        params: [
-          { key: 'duration', label: 'Cycle', unit: 'ms', type: 'slider', min: 400, max: 4000, step: 100, default: 1600 },
-          { key: 'turns', label: 'Turns / cycle', type: 'slider', min: 0.25, max: 4, step: 0.25, default: 1 },
-          { key: 'curve', label: 'Curve', type: 'select', options: ['linear','easeInOut','easeOutBack'], default: 'linear' },
-          { key: 'reverse', label: 'Ping-pong', type: 'toggle', default: false },
-          { key: 'color', label: 'Color', type: 'color', default: '#3fb950' },
-        ],
-        pitfalls: [
-          { claim: 'Forgetting `controller.dispose()` leaks a Ticker on every page rebuild.', fix: 'Override `dispose()` and call `controller.dispose()`. The framework asserts this in debug but only on hot reload of that widget.', source: 'https://api.flutter.dev/flutter/animation/AnimationController-class.html', confidence: 'official-docs' },
-          { claim: '`repeat(reverse: true)` doubles the perceived cycle duration.', fix: 'Halve `duration` if you want the round-trip to feel like the original one-way time.', source: 'measured against frame timeline', confidence: 'measured' },
-          { claim: 'Rebuilding the parent recreates the controller and resets animation.', fix: 'Keep the controller in a State (not a build local) — or use `useAnimationController` from flutter_hooks.', source: 'community Flutter Discord — 2026-04 thread', confidence: 'community-consensus' },
-        ],
-      },
-      {
-        id: 'hero-card',
-        title: 'Hero Card Expand',
-        category: 'hero',
-        difficulty: 3,
-        tags: ['shared-element', 'navigation'],
-        summary: 'Two routes share a Hero tag — Flutter automatically morphs the bounds during the push transition.',
-        verifiedOn: 'Flutter 3.32 / 2026-06',
-        codeTemplate:
-`// On list screen
-Hero(
-  tag: 'card-\${item.id}',
-  flightShuttleBuilder: _shuttle,
-  child: Material(
-    color: {{color}},
-    borderRadius: BorderRadius.circular({{radius}}),
-    child: SizedBox(width: {{startW}}, height: {{startH}}),
-  ),
-)
-
-// Push with a {{duration}}ms transition
-Navigator.of(context).push(PageRouteBuilder(
-  transitionDuration: Duration(milliseconds: {{duration}}),
-  pageBuilder: (_, __, ___) => DetailPage(item: item),
-));`,
-        params: [
-          { key: 'duration', label: 'Transition', unit: 'ms', type: 'slider', min: 200, max: 1400, step: 50, default: 550 },
-          { key: 'startW', label: 'Start width', unit: 'px', type: 'slider', min: 80, max: 220, step: 4, default: 140 },
-          { key: 'startH', label: 'Start height', unit: 'px', type: 'slider', min: 60, max: 200, step: 4, default: 100 },
-          { key: 'radius', label: 'Corner radius', unit: 'px', type: 'slider', min: 0, max: 40, step: 2, default: 12 },
-          { key: 'color', label: 'Color', type: 'color', default: '#4dd0e1' },
-        ],
-        pitfalls: [
-          { claim: 'Two Heroes with the same tag on screen at once throws in debug.', fix: 'Scope tags by route — e.g. include the item id and the route name in the tag.', source: 'https://api.flutter.dev/flutter/widgets/Hero-class.html', confidence: 'official-docs' },
-          { claim: 'Wrapping a Hero in an Opacity that animates to 0 makes it disappear mid-flight.', fix: 'Animate opacity on the *destination* widget, not on the Hero itself; or use `flightShuttleBuilder` to control the flying widget.', source: 'https://github.com/flutter/flutter/issues/40239', confidence: 'github-issue' },
-          { claim: 'Default flight uses a destination-shaped widget — text re-flow can pop.', fix: 'Provide a `flightShuttleBuilder` that returns a Material of the *largest* needed size to keep typography stable.', source: 'personal — shipped in 3 production apps', confidence: 'author-experience' },
-        ],
-      },
-      {
-        id: 'staggered-list',
-        title: 'Staggered List Entrance',
-        category: 'staggered',
-        difficulty: 2,
-        tags: ['list', 'entrance', 'interval'],
-        summary: 'A single controller drives N items via Interval — each gets its own slice of the timeline.',
-        verifiedOn: 'Flutter 3.32 / 2026-06',
-        codeTemplate:
-`final controller = AnimationController(
-  vsync: this,
-  duration: Duration(milliseconds: {{duration}}),
-)..forward();
-
-return Column(
-  children: List.generate({{count}}, (i) {
-    final start = (i / {{count}}) * {{stagger}};
-    final anim = CurvedAnimation(
-      parent: controller,
-      curve: Interval(start, (start + 0.3).clamp(0, 1),
-                      curve: Curves.easeOutCubic),
-    );
-    return FadeTransition(
-      opacity: anim,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, {{slide}}),
-          end: Offset.zero,
-        ).animate(anim),
-        child: ListItem(index: i),
-      ),
-    );
-  }),
-);`,
-        params: [
-          { key: 'count', label: 'Items', type: 'slider', min: 3, max: 12, step: 1, default: 7 },
-          { key: 'duration', label: 'Total duration', unit: 'ms', type: 'slider', min: 400, max: 2400, step: 50, default: 1100 },
-          { key: 'stagger', label: 'Stagger window', type: 'slider', min: 0.2, max: 0.9, step: 0.05, default: 0.7 },
-          { key: 'slide', label: 'Slide offset', type: 'slider', min: 0, max: 1, step: 0.05, default: 0.4 },
-          { key: 'direction', label: 'Direction', type: 'select', options: ['slide-up','slide-down','fade-only'], default: 'slide-up' },
-        ],
-        pitfalls: [
-          { claim: '`Interval(start, end)` where end > 1 silently clamps and breaks the curve.', fix: 'Use `.clamp(0, 1)` on the end, or recompute `stagger` to leave room for the 0.3 window per item.', source: 'https://api.flutter.dev/flutter/animation/Interval-class.html', confidence: 'official-docs' },
-          { claim: 'For 50+ items the single-controller approach blocks the raster thread.', fix: 'Switch to `AnimatedList` with per-item enter animations — Flutter recycles the off-screen tickers.', source: 'measured on Pixel 7, list of 80', confidence: 'measured' },
-          { claim: 'Re-running `controller.forward()` from a setState reverses already-shown items.', fix: 'Guard with `if (controller.status == AnimationStatus.dismissed)` or use `flutter_animate`\'s `.animate(target: 1)`.', source: 'community Flutter Discord 2026-03', confidence: 'community-consensus' },
-        ],
-      },
-      {
-        id: 'spring-physics',
-        title: 'SpringSimulation (Physics)',
-        category: 'physics',
-        difficulty: 4,
-        tags: ['spring', 'physics', 'simulation'],
-        summary: 'A SpringSimulation feeds an AnimationController without a fixed duration — the spring decides when it\'s settled.',
-        verifiedOn: 'Flutter 3.32 / 2026-06',
-        codeTemplate:
-`final spring = SpringDescription(
-  mass: {{mass}},
-  stiffness: {{stiffness}},
-  damping: {{damping}},
-);
-
-final sim = SpringSimulation(spring, 0, 1, 0); // start, end, initial velocity
-controller.animateWith(sim);
-
-return AnimatedBuilder(
-  animation: controller,
-  builder: (_, __) => Transform.translate(
-    offset: Offset({{travel}} * controller.value, 0),
-    child: Container(width: 56, height: 56, color: {{color}}),
-  ),
-);`,
-        params: [
-          { key: 'mass', label: 'Mass', type: 'slider', min: 0.2, max: 4, step: 0.1, default: 1 },
-          { key: 'stiffness', label: 'Stiffness', type: 'slider', min: 20, max: 500, step: 10, default: 180 },
-          { key: 'damping', label: 'Damping', type: 'slider', min: 2, max: 40, step: 1, default: 12 },
-          { key: 'travel', label: 'Travel', unit: 'px', type: 'slider', min: 60, max: 260, step: 4, default: 160 },
-          { key: 'color', label: 'Color', type: 'color', default: '#d29922' },
-        ],
-        pitfalls: [
-          { claim: 'A damping ratio below ~1 looks "bouncy"; below ~0.3 looks broken.', fix: 'Compute the ratio: `damping / (2 * sqrt(mass * stiffness))`. Aim for 0.4–0.8 for delightful motion.', source: 'https://api.flutter.dev/flutter/physics/SpringDescription-class.html', confidence: 'official-docs' },
-          { claim: '`animateWith` doesn\'t respect the controller\'s `duration` — it overrides it.', fix: 'Don\'t set `duration` when you plan to use simulations; it\'s a no-op and misleads readers.', source: 'measured 3.32 source — animation_controller.dart L460', confidence: 'measured' },
-          { claim: 'Very high stiffness + low mass numerically explodes on slow devices.', fix: 'Clamp stiffness/mass ratio to <= ~600 in production, or fall back to a `CurvedAnimation`.', source: 'personal — hit it shipping a swipe-to-dismiss', confidence: 'author-experience' },
-        ],
-      },
-      {
-        id: 'custom-painter-pulse',
-        title: 'CustomPainter Radial Pulse',
-        category: 'custom-painter',
-        difficulty: 5,
-        tags: ['canvas', 'painter', 'radial'],
-        summary: 'Drive a CustomPainter from a controller — re-paint each frame with a phase derived from controller.value.',
-        verifiedOn: 'Flutter 3.32 / 2026-06',
-        codeTemplate:
-`class PulsePainter extends CustomPainter {
-  PulsePainter(this.phase, this.rings, this.hue) : super(repaint: phase);
-  final Animation<double> phase;
-  final int rings;
-  final Color hue;
-
-  @override
-  void paint(Canvas c, Size s) {
-    final ctr = s.center(Offset.zero);
-    for (var i = 0; i < rings; i++) {
-      final t = ((phase.value + i / rings) % 1.0);
-      final r = t * {{maxRadius}};
-      final paint = Paint()
-        ..color = hue.withOpacity((1 - t) * {{opacity}})
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = {{stroke}};
-      c.drawCircle(ctr, r, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_) => false; // repaint is wired to controller
-}`,
-        params: [
-          { key: 'rings', label: 'Rings', type: 'slider', min: 2, max: 10, step: 1, default: 5 },
-          { key: 'maxRadius', label: 'Max radius', unit: 'px', type: 'slider', min: 40, max: 160, step: 4, default: 110 },
-          { key: 'stroke', label: 'Stroke', unit: 'px', type: 'slider', min: 1, max: 8, step: 0.5, default: 2 },
-          { key: 'opacity', label: 'Opacity', type: 'slider', min: 0.2, max: 1, step: 0.05, default: 0.8 },
-          { key: 'speed', label: 'Speed', unit: 'ms', type: 'slider', min: 600, max: 4000, step: 100, default: 1800 },
-          { key: 'color', label: 'Color', type: 'color', default: '#4dd0e1' },
-        ],
-        pitfalls: [
-          { claim: '`shouldRepaint` returning `true` always burns CPU on every parent rebuild.', fix: 'Pass the animation to `super(repaint: phase)` and return `false` from `shouldRepaint` — the canvas redraws only when the Listenable ticks.', source: 'https://api.flutter.dev/flutter/rendering/CustomPainter/repaint.html', confidence: 'official-docs' },
-          { claim: 'Allocating Paint objects inside `paint()` causes GC churn at 60fps.', fix: 'Cache the Paint as a field; mutate `.color` / `.strokeWidth` per call instead.', source: 'devtools timeline, measured 2026-05', confidence: 'measured' },
-          { claim: 'CustomPainter inside a Transform that scales blurs strokes on hi-DPI.', fix: 'Use `RasterWidget` or paint into the post-scale coordinate space — Flutter\'s default stroke math is in logical px.', source: 'https://github.com/flutter/flutter/issues/119084', confidence: 'github-issue' },
-        ],
-      },
-    ];
-    return this._data;
-  }
-
-  categoryMeta(cat) {
-    const m = {
-      'implicit':       { label: 'Implicit',       color: '#4dd0e1' },
-      'explicit':       { label: 'Explicit',       color: '#3fb950' },
-      'hero':           { label: 'Hero',           color: '#d29922' },
-      'staggered':      { label: 'Staggered',      color: '#bc8cff' },
-      'physics':        { label: 'Physics',        color: '#ff7b72' },
-      'custom-painter': { label: 'CustomPainter',  color: '#79c0ff' },
-    };
-    return m[cat] || { label: cat, color: '#8b949e' };
-  }
-
-  confidenceMeta(c) {
-    const m = {
-      'official-docs':       { label: 'official docs',       bg: 'rgba(63,185,150,0.15)',  fg: '#3fb950' },
-      'measured':            { label: 'measured',            bg: 'rgba(121,192,255,0.15)', fg: '#79c0ff' },
-      'github-issue':        { label: 'github issue',        bg: 'rgba(77,208,225,0.15)',  fg: '#4dd0e1' },
-      'community-consensus': { label: 'community consensus', bg: 'rgba(125,133,144,0.18)', fg: '#a0a8b3' },
-      'author-experience':   { label: 'author experience',   bg: 'rgba(139,148,158,0.15)', fg: '#8b949e' },
-    };
-    return m[c] || { label: c, bg: '#21262d', fg: '#8b949e' };
-  }
-
-  // ---------- Helpers ----------
-  setParam(entryId, key, value) {
-    this.setState(s => ({
-      paramValues: { ...s.paramValues, [entryId]: { ...s.paramValues[entryId], [key]: value } },
-      flashKey:   { ...s.flashKey, [`${entryId}-${key}`]: Date.now() },
-    }));
-    const tkey = `${entryId}-${key}`;
-    clearTimeout(this._highlightTimers[tkey]);
-    this._highlightTimers[tkey] = setTimeout(() => {
-      this.setState(s => {
-        const f = { ...s.flashKey };
-        delete f[tkey];
-        return { flashKey: f };
-      });
-    }, 700);
-  }
-
-  replay(entryId) {
-    this.setState(s => ({
-      replayKey: { ...s.replayKey, [entryId]: (s.replayKey[entryId] || 0) + 1 }
-    }));
-  }
-
-  formatParam(entry, key, value) {
-    const p = entry.params.find(x => x.key === key);
-    if (!p) return String(value);
-    if (p.type === 'color') return `Color(0xFF${value.replace('#','').toUpperCase()})`;
-    if (p.type === 'toggle') return value ? 'true' : 'false';
-    if (p.type === 'slider') {
-      const v = Number(value);
-      return Number.isInteger(p.step) && Number.isInteger(v) ? String(v) : v.toFixed(2).replace(/\.?0+$/, '');
-    }
-    return String(value);
-  }
-
-  curveToEase(curve) {
-    switch (curve) {
-      case 'easeInOutCubic': return { ease: [0.65, 0, 0.35, 1] };
-      case 'elasticOut':     return { type: 'spring', stiffness: 120, damping: 6, mass: 1 };
-      case 'bounceOut':      return { type: 'spring', stiffness: 260, damping: 10, mass: 1 };
-      case 'easeInOut':      return { ease: [0.45, 0, 0.55, 1] };
-      case 'easeOutBack':    return { ease: [0.34, 1.56, 0.64, 1] };
-      case 'easeOutCubic':   return { ease: [0.33, 1, 0.68, 1] };
-      case 'linear':         return { ease: 'linear' };
-      default:               return { ease: [0.65, 0, 0.35, 1] };
-    }
-  }
-
-  copyText(text, label) {
-    try {
-      navigator.clipboard.writeText(text);
-    } catch (e) {}
-    this.setState({ copyToast: label });
-    clearTimeout(this._toastT);
-    this._toastT = setTimeout(() => this.setState({ copyToast: null }), 1600);
-  }
-
-  // ---------- Render previews ----------
-  renderPreview(entry, vals, mini) {
-    if (!this.state.fmReady) {
-      return React.createElement('div', { className: 'mono text-xs', style: { color: '#6e7681' } }, 'loading framer-motion…');
-    }
-    const fm = this.fm;
-    const { motion, AnimatePresence } = fm;
-    const replay = this.state.replayKey[entry.id] || 0;
-    const m = mini ? 0.5 : 1;
-
-    switch (entry.id) {
-      case 'animated-container': {
-        const t = this.curveToEase(vals.curve);
-        const transition = { duration: Math.max(0.05, vals.duration / 1000), ...t };
-        // Pulse between the chosen size and a smaller one each auto-tick, so it keeps moving
-        const sz = (replay % 2 === 0 ? vals.size : vals.size * 0.6) * m;
-        return React.createElement(motion.div, {
-          animate: {
-            width: sz,
-            height: sz,
-            borderRadius: vals.radius * m,
-            backgroundColor: vals.color,
-          },
-          transition,
-          initial: false,
-          style: { boxShadow: '0 8px 30px -10px rgba(77,208,225,0.35)' },
-        });
-      }
-      case 'explicit-rotation': {
-        const t = this.curveToEase(vals.curve);
-        const dur = vals.duration / 1000;
-        return React.createElement(motion.div, {
-          key: replay,
-          animate: { rotate: vals.reverse ? [0, 360 * vals.turns, 0] : [0, 360 * vals.turns] },
-          transition: { duration: dur, repeat: Infinity, ...t },
-          style: {
-            width: 96 * m, height: 96 * m,
-            background: vals.color, borderRadius: 8,
-            boxShadow: '0 6px 24px -8px rgba(63,185,150,0.45)'
-          }
-        });
-      }
-      case 'hero-card': {
-        return React.createElement(HeroDemo, { fm, vals, replay, mini });
-      }
-      case 'staggered-list': {
-        return React.createElement(StaggerDemo, { fm, vals, replay, mini });
-      }
-      case 'spring-physics': {
-        const stiffness = vals.stiffness, damping = vals.damping, mass = vals.mass;
-        const travel = vals.travel * m;
-        return React.createElement('div', {
-          style: { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: 8 }
-        },
-          React.createElement(motion.div, {
-            key: replay,
-            initial: { x: 0 },
-            animate: { x: travel },
-            transition: { type: 'spring', stiffness, damping, mass },
-            style: {
-              width: 56 * m, height: 56 * m, background: vals.color, borderRadius: 12,
-              boxShadow: '0 6px 24px -8px rgba(210,153,34,0.5)'
-            }
-          })
-        );
-      }
-      case 'custom-painter-pulse': {
-        return React.createElement(PulseDemo, { fm, vals, replay, mini });
-      }
-      default:
-        return null;
-    }
-  }
-
-  // ---------- Code with highlight tokens ----------
-  renderCode(entry, vals) {
-    const parts = entry.codeTemplate.split(/(\{\{[^}]+\}\})/);
-    const out = [];
-    parts.forEach((part, i) => {
-      const m = part.match(/^\{\{([^}]+)\}\}$/);
-      if (m) {
-        const key = m[1];
-        const fkey = `${entry.id}-${key}`;
-        const flashed = !!this.state.flashKey[fkey];
-        out.push(React.createElement('span', {
-          key: 'p' + i,
-          className: flashed ? 'tok-flash' : '',
-          style: {
-            color: '#4dd0e1',
-            borderRadius: 3,
-            padding: '0 2px',
-          }
-        }, this.formatParam(entry, key, vals[key])));
-      } else {
-        // Light syntax tinting for keywords / strings
-        out.push(React.createElement(React.Fragment, { key: 'p' + i }, this.tintDart(part, i)));
-      }
-    });
-    return out;
-  }
-
-  tintDart(src, baseKey) {
-    // Cheap, intentional tinting: keywords, types, strings, comments, numbers
-    const tokens = [];
-    const re = /(\/\/[^\n]*)|('[^'\n]*')|(\b(?:final|const|return|class|extends|new|void|if|else|for|var|true|false|null|this|super|override)\b)|(\b(?:int|double|String|bool|List|Map|Offset|Duration|Color|Curves|BoxDecoration|BorderRadius|SizedBox|Container|Material|Tween|CurveTween|CurvedAnimation|Interval|FadeTransition|SlideTransition|RotationTransition|AnimationController|Animation|Hero|PageRouteBuilder|Navigator|SpringDescription|SpringSimulation|Transform|AnimatedBuilder|AnimatedContainer|CustomPainter|Canvas|Size|Paint|PaintingStyle|AnimationStatus|ListItem|DetailPage|Column)\b)|(\b\d+(?:\.\d+)?\b)/g;
-    let last = 0; let m; let idx = 0;
-    while ((m = re.exec(src)) !== null) {
-      if (m.index > last) tokens.push({ t: src.slice(last, m.index), c: 'plain' });
-      if (m[1]) tokens.push({ t: m[1], c: 'comment' });
-      else if (m[2]) tokens.push({ t: m[2], c: 'string' });
-      else if (m[3]) tokens.push({ t: m[3], c: 'kw' });
-      else if (m[4]) tokens.push({ t: m[4], c: 'type' });
-      else if (m[5]) tokens.push({ t: m[5], c: 'num' });
-      last = re.lastIndex;
-    }
-    if (last < src.length) tokens.push({ t: src.slice(last), c: 'plain' });
-    const colorMap = {
-      plain: '#e6edf3', comment: '#7d8590', string: '#a5d6ff',
-      kw: '#ff7b72', type: '#79c0ff', num: '#f0883e',
-    };
-    return tokens.map((tk, i) => React.createElement('span', {
-      key: `t${baseKey}-${i}`, style: { color: colorMap[tk.c] }
-    }, tk.t));
-  }
-
-  // ---------- Page rendering ----------
-  renderGallery() {
-    const data = this.getData();
-    const { search, category } = this.state;
-    const q = search.trim().toLowerCase();
-    const filtered = data.filter(e => {
-      if (category !== 'all' && e.category !== category) return false;
-      if (!q) return true;
-      return e.title.toLowerCase().includes(q)
-          || e.summary.toLowerCase().includes(q)
-          || e.tags.some(t => t.includes(q));
-    });
-
-    const chips = ['all', 'implicit', 'explicit', 'hero', 'staggered', 'physics', 'custom-painter'];
-
-    return React.createElement('div', { style: { width: '100%' } },
-      // Hero
-      React.createElement('section', { className: 'hero-bg', style: { padding: '64px 32px 40px', borderBottom: '1px solid #21262d' } },
-        React.createElement('div', { style: { maxWidth: 1200, margin: '0 auto' } },
-          React.createElement('div', { className: 'mono', style: { color: '#4dd0e1', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 } }, '// flutter_motion_kit'),
-          React.createElement('h1', { style: { fontSize: 44, lineHeight: 1.05, fontWeight: 700, letterSpacing: -1, margin: 0, maxWidth: 820 } },
-            'Flutter animations you can ',
-            React.createElement('span', { style: { color: '#4dd0e1' } }, 'preview'),
-            ', ',
-            React.createElement('span', { style: { color: '#3fb950' } }, 'tweak'),
-            ', and ',
-            React.createElement('span', { style: { color: '#d29922' } }, 'trust'),
-            '.'
-          ),
-          React.createElement('p', { style: { fontSize: 16, color: '#8b949e', maxWidth: 680, marginTop: 16, lineHeight: 1.5 } },
-            'Machine-verified snippets with live parameter playgrounds, sourced pitfalls, and one-click handoff into your AI coding assistant. Built for Flutter 3.32+.'
-          ),
-          // Install button group
-          React.createElement('div', { style: { display: 'flex', gap: 10, marginTop: 26, flexWrap: 'wrap', alignItems: 'center' } },
-            (() => {
-              const MCP = 'https://mcp.markxian.cn/mcp';
-              const cfg = JSON.stringify({ url: MCP });
-              const btn = (primary) => ({
-                background: primary ? '#4dd0e1' : '#161b22',
-                color: primary ? '#0d1117' : '#e6edf3',
-                border: primary ? 'none' : '1px solid #30363d',
-                padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none',
-              });
-              return [
-                React.createElement('a', {
-                  key: 'cursor', href: 'cursor://anysphere.cursor-deeplink/mcp/install?name=flutter-motion&config=' + btoa(cfg), style: btn(true),
-                }, React.createElement('span', null, '＋'), React.createElement('span', null, 'Add to Cursor')),
-                React.createElement('a', {
-                  key: 'vscode', href: 'https://insiders.vscode.dev/redirect/mcp/install?name=flutter-motion&config=' + encodeURIComponent(cfg), style: btn(false),
-                }, React.createElement('span', null, '＋'), React.createElement('span', null, 'Add to VS Code')),
-                React.createElement('button', {
-                  key: 'cc', onClick: () => this.copyText('claude mcp add --transport http flutter-motion ' + MCP, 'Claude Code command copied'), style: btn(false),
-                }, React.createElement('span', { className: 'mono' }, '$'), React.createElement('span', null, 'Copy Claude Code command')),
-              ];
-            })(),
-            // Live developers connected badge
-            React.createElement('div', { className: 'mono', style: {
-              marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 8,
-              fontSize: 12, color: '#8b949e', padding: '7px 12px',
-              background: '#0d1117', border: '1px solid #21262d', borderRadius: 999,
-            } },
-              React.createElement('span', { className: 'live-dot', style: { width: 7, height: 7, borderRadius: '50%', background: '#3fb950', boxShadow: '0 0 8px #3fb950' } }),
-              React.createElement('span', null, this.state.devsConnected.toLocaleString(), ' developers connected')
-            )
-          ),
-          // small stats
-          React.createElement('div', { className: 'mono', style: { display: 'flex', gap: 28, marginTop: 32, fontSize: 12, color: '#7d8590' } },
-            React.createElement('div', null, React.createElement('span', { style: { color: '#e6edf3' } }, data.length), ' verified entries'),
-            React.createElement('div', null, React.createElement('span', { style: { color: '#e6edf3' } }, data.reduce((a, e) => a + e.pitfalls.length, 0)), ' sourced pitfalls'),
-            React.createElement('div', null, 'verified ', React.createElement('span', { style: { color: '#e6edf3' } }, 'Flutter 3.32 / 2026-06')),
-          )
-        )
-      ),
-      // Filter row
-      React.createElement('section', { style: { padding: '24px 32px 8px' } },
-        React.createElement('div', { style: { maxWidth: 1200, margin: '0 auto', display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' } },
-          React.createElement('div', { style: { position: 'relative', flex: '0 0 280px' } },
-            React.createElement('input', {
-              type: 'text',
-              value: search,
-              onChange: (e) => this.setState({ search: e.target.value }),
-              placeholder: 'Search animations, tags…',
-              style: {
-                width: '100%', background: '#161b22', border: '1px solid #30363d', borderRadius: 8,
-                padding: '8px 12px 8px 32px', fontSize: 13, color: '#e6edf3',
-              }
-            }),
-            React.createElement('span', { className: 'mono', style: {
-              position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)',
-              color: '#6e7681', fontSize: 13, pointerEvents: 'none'
-            } }, '⌕')
-          ),
-          React.createElement('div', { style: { display: 'flex', gap: 6, flexWrap: 'wrap' } },
-            chips.map(c => {
-              const active = category === c;
-              const meta = c === 'all' ? { label: 'all', color: '#e6edf3' } : this.categoryMeta(c);
-              return React.createElement('button', {
-                key: c, onClick: () => this.setState({ category: c }),
-                style: {
-                  background: active ? 'rgba(77,208,225,0.10)' : '#161b22',
-                  border: '1px solid ' + (active ? '#4dd0e1' : '#30363d'),
-                  color: active ? '#4dd0e1' : '#8b949e',
-                  padding: '5px 11px', borderRadius: 999, fontSize: 12, fontWeight: 500,
-                  cursor: 'pointer', textTransform: 'lowercase',
-                  fontFamily: c === 'all' ? 'inherit' : 'JetBrains Mono, monospace',
-                }
-              }, meta.label);
-            })
-          ),
-          React.createElement('div', { style: { marginLeft: 'auto', fontSize: 12, color: '#6e7681' } },
-            filtered.length, ' of ', data.length, ' entries'
-          )
-        )
-      ),
-      // Grid
-      React.createElement('section', { style: { padding: '20px 32px 80px' } },
-        React.createElement('div', { style: {
-          maxWidth: 1200, margin: '0 auto',
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 18
-        } },
-          filtered.map(e => this.renderCard(e))
-        )
-      )
-    );
-  }
-
-  renderCard(entry) {
-    const meta = this.categoryMeta(entry.category);
-    const vals = this.state.paramValues[entry.id];
-    const cardId = `card-${entry.id}`;
-    return React.createElement('article', {
-      key: entry.id,
-      className: 'card',
-      onMouseEnter: () => this.setState({ [`hover-${entry.id}`]: true }),
-      onMouseLeave: () => this.setState({ [`hover-${entry.id}`]: false }),
-      onClick: () => this.setState({ view: 'detail', selectedId: entry.id }),
-      style: {
-        background: '#161b22', border: '1px solid #30363d', borderRadius: 12,
-        padding: 16, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 12,
-        minHeight: 250,
-      }
-    },
-      // mini preview area
-      React.createElement('div', { style: {
-        height: 130, background: '#0d1117', border: '1px solid #21262d', borderRadius: 8,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative'
-      } },
-        React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8 } },
-          this.renderPreview(entry, vals, true)
-        ),
-        React.createElement('div', { className: 'mono', style: { position: 'absolute', top: 6, left: 8, fontSize: 10, color: meta.color, textTransform: 'lowercase' } },
-          meta.label
-        )
-      ),
-      // title + difficulty
-      React.createElement('div', { style: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 } },
-        React.createElement('h3', { style: { fontSize: 15, fontWeight: 600, margin: 0, color: '#e6edf3' } }, entry.title),
-        React.createElement('div', { className: 'mono', style: { fontSize: 10, color: '#6e7681', display: 'flex', gap: 2, flexShrink: 0 } },
-          [1,2,3,4,5].map(i => React.createElement('span', { key: i, style: { color: i <= entry.difficulty ? '#d29922' : '#30363d' } }, '●'))
-        )
-      ),
-      React.createElement('p', { style: { fontSize: 12, color: '#8b949e', margin: 0, lineHeight: 1.45, flex: 1 } }, entry.summary),
-      // tags
-      React.createElement('div', { className: 'mono', style: { display: 'flex', gap: 8, fontSize: 10, color: '#6e7681', flexWrap: 'wrap' } },
-        entry.tags.map(t => React.createElement('span', { key: t }, '#', t))
-      )
-    );
-  }
-
-  renderDetail() {
-    const entry = this.getData().find(e => e.id === this.state.selectedId);
-    if (!entry) return null;
-    const vals = this.state.paramValues[entry.id];
-    const meta = this.categoryMeta(entry.category);
-
-    return React.createElement('div', { style: { width: '100%' } },
-      // Sub-header
-      React.createElement('section', { style: { padding: '24px 32px', borderBottom: '1px solid #21262d' } },
-        React.createElement('div', { style: { maxWidth: 1320, margin: '0 auto' } },
-          React.createElement('button', {
-            onClick: () => this.setState({ view: 'gallery' }),
-            style: { background: 'transparent', border: 'none', color: '#8b949e', fontSize: 12, cursor: 'pointer', padding: 0, marginBottom: 12 }
-          }, '← all animations'),
-          React.createElement('div', { style: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' } },
-            React.createElement('div', null,
-              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 } },
-                React.createElement('span', { className: 'mono', style: { fontSize: 11, color: meta.color, textTransform: 'uppercase', letterSpacing: 1.2 } }, meta.label),
-                React.createElement('span', { style: { color: '#30363d' } }, '·'),
-                React.createElement('span', { className: 'mono', style: { fontSize: 11, color: '#6e7681' } }, 'verified ', entry.verifiedOn)
-              ),
-              React.createElement('h1', { style: { fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: -0.5 } }, entry.title),
-              React.createElement('p', { style: { fontSize: 14, color: '#8b949e', marginTop: 6, maxWidth: 620, lineHeight: 1.5 } }, entry.summary)
-            ),
-            React.createElement('button', {
-              onClick: () => {
-                const params = entry.params.map(p => `${p.label} = ${this.formatParam(entry, p.key, vals[p.key])}${p.unit ? ' ' + p.unit : ''}`).join(', ');
-                const code = this.dartFinalCode(entry, vals);
-                const pf = entry.pitfalls.map(p => `- ${p.claim}\n  fix: ${p.fix}\n  source (${p.confidence}): ${p.source}`).join('\n');
-                const payload =
-`I want exactly this Flutter animation effect: ${entry.title} (${entry.category}).
-Tuned parameters: ${params}.
-
-Implement it in my project using the reference below, and you MUST follow every pitfall.
-For the verified, lint-passing implementation prefer the flutter-motion MCP
-(search_flutter_animation for a "${entry.category}" animation, then get_animation),
-or see https://motion.markxian.cn/gallery .
-
-\`\`\`dart
-${code}
-\`\`\`
-
-Pitfalls (do not violate):
-${pf}
-
-(verified ${entry.verifiedOn})`;
-                this.copyText(payload, 'Copied — paste into your AI assistant');
-              },
-              style: {
-                background: '#4dd0e1', color: '#0d1117', border: 'none',
-                padding: '10px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                display: 'inline-flex', alignItems: 'center', gap: 8, flexShrink: 0,
-              }
-            }, '📋 Copy for AI (code + pitfalls)')
-          )
-        )
-      ),
-      // Three zones
-      React.createElement('section', { style: { padding: '24px 32px' } },
-        React.createElement('div', { style: {
-          maxWidth: 1320, margin: '0 auto',
-          display: 'grid', gridTemplateColumns: 'minmax(280px, 1.1fr) 280px minmax(360px, 1.4fr)',
-          gap: 18,
-        } },
-          // Preview pane
-          React.createElement('div', { style: { background: '#161b22', border: '1px solid #30363d', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' } },
-            React.createElement('div', { style: { padding: '10px 14px', borderBottom: '1px solid #21262d', display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
-              React.createElement('div', { className: 'mono', style: { fontSize: 11, color: '#7d8590', letterSpacing: 1, textTransform: 'uppercase' } }, 'live preview'),
-              React.createElement('button', {
-                onClick: () => this.replay(entry.id),
-                style: { background: 'transparent', border: '1px solid #30363d', color: '#e6edf3', padding: '4px 10px', borderRadius: 6, fontSize: 11, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }
-              }, '↻ Replay')
-            ),
-            React.createElement('div', { style: {
-              flex: 1, minHeight: 360, position: 'relative',
-              background: 'repeating-linear-gradient(45deg, transparent 0, transparent 12px, rgba(255,255,255,0.012) 12px, rgba(255,255,255,0.012) 24px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24
-            } },
-              this.renderPreview(entry, vals, false)
-            )
-          ),
-          // Controls pane
-          React.createElement('div', { style: { background: '#161b22', border: '1px solid #30363d', borderRadius: 12, overflow: 'hidden' } },
-            React.createElement('div', { style: { padding: '10px 14px', borderBottom: '1px solid #21262d' } },
-              React.createElement('div', { className: 'mono', style: { fontSize: 11, color: '#7d8590', letterSpacing: 1, textTransform: 'uppercase' } }, 'parameters')
-            ),
-            React.createElement('div', { style: { padding: 16, display: 'flex', flexDirection: 'column', gap: 16 } },
-              entry.params.map(p => this.renderControl(entry, p, vals))
-            )
-          ),
-          // Code pane
-          React.createElement('div', { style: { background: '#161b22', border: '1px solid #30363d', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 360 } },
-            React.createElement('div', { style: { padding: '10px 14px', borderBottom: '1px solid #21262d', display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
-              React.createElement('div', { className: 'mono', style: { fontSize: 11, color: '#7d8590', letterSpacing: 1, textTransform: 'uppercase' } }, entry.id, '.dart'),
-              React.createElement('button', {
-                onClick: () => this.copyText(this.dartFinalCode(entry, vals), 'Code copied'),
-                style: { background: 'transparent', border: '1px solid #30363d', color: '#e6edf3', padding: '4px 10px', borderRadius: 6, fontSize: 11, cursor: 'pointer' }
-              }, '📋 Copy')
-            ),
-            React.createElement('pre', { className: 'mono', style: {
-              margin: 0, padding: 16, fontSize: 12.5, lineHeight: 1.65, color: '#e6edf3',
-              flex: 1, overflow: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-            } },
-              this.renderCode(entry, vals)
-            )
-          )
-        ),
-        // Pitfalls
-        React.createElement('div', { style: { maxWidth: 1320, margin: '32px auto 80px' } },
-          React.createElement('div', { style: { display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 14 } },
-            React.createElement('h2', { style: { fontSize: 16, fontWeight: 600, margin: 0 } }, 'Pitfalls & gotchas'),
-            React.createElement('span', { className: 'mono', style: { fontSize: 11, color: '#6e7681' } }, entry.pitfalls.length, ' sourced')
-          ),
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 14 } },
-            entry.pitfalls.map((p, i) => this.renderPitfall(p, i))
-          )
-        )
-      )
-    );
-  }
-
-  renderPitfall(p, i) {
-    const cm = this.confidenceMeta(p.confidence);
-    let host = '';
-    try { host = new URL(p.source).host.replace('www.', ''); } catch (e) { host = p.source.length > 40 ? p.source.slice(0, 38) + '…' : p.source; }
-    return React.createElement('div', {
-      key: i,
-      style: { background: '#161b22', border: '1px solid #30363d', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }
-    },
-      React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8 } },
-        React.createElement('span', { className: 'mono', style: { background: cm.bg, color: cm.fg, padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 500, textTransform: 'lowercase' } }, cm.label)
-      ),
-      React.createElement('div', { style: { fontSize: 13, color: '#e6edf3', fontWeight: 500, lineHeight: 1.45 } }, p.claim),
-      React.createElement('div', { style: { fontSize: 12.5, color: '#8b949e', lineHeight: 1.5 } },
-        React.createElement('span', { className: 'mono', style: { color: '#3fb950', marginRight: 6 } }, 'fix →'),
-        p.fix
-      ),
-      React.createElement('a', {
-        href: p.source.startsWith('http') ? p.source : '#',
-        target: '_blank',
-        rel: 'noreferrer',
-        onClick: (e) => { if (!p.source.startsWith('http')) e.preventDefault(); },
-        style: { fontSize: 11, color: '#4dd0e1', textDecoration: 'none', marginTop: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }
-      },
-        React.createElement('span', { className: 'mono' }, '↗'),
-        host
-      )
-    );
-  }
-
-  renderControl(entry, p, vals) {
-    const value = vals[p.key];
-    const fkey = `${entry.id}-${p.key}`;
-    const flashed = !!this.state.flashKey[fkey];
-    const labelStyle = { fontSize: 11, color: '#8b949e', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 };
-    const valueStyle = {
-      fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
-      color: flashed ? '#ffe066' : '#4dd0e1',
-      transition: 'color 0.5s',
-    };
-    let control;
-    if (p.type === 'slider') {
-      control = React.createElement('input', {
-        type: 'range', min: p.min, max: p.max, step: p.step, value,
-        onChange: (e) => this.setParam(entry.id, p.key, Number(e.target.value)),
-      });
-    } else if (p.type === 'select') {
-      control = React.createElement('select', {
-        value, onChange: (e) => this.setParam(entry.id, p.key, e.target.value),
-        style: { width: '100%' }
-      },
-        p.options.map(o => React.createElement('option', { key: o, value: o }, o))
-      );
-    } else if (p.type === 'color') {
-      control = React.createElement('div', { style: { display: 'flex', gap: 8, alignItems: 'center' } },
-        React.createElement('input', { type: 'color', value, onChange: (e) => this.setParam(entry.id, p.key, e.target.value), style: { width: 44, height: 30, padding: 2 } }),
-        React.createElement('span', { className: 'mono', style: { fontSize: 11, color: '#8b949e' } }, value.toUpperCase())
-      );
-    } else if (p.type === 'toggle') {
-      control = React.createElement('div', {
-        className: 'toggle ' + (value ? 'on' : ''),
-        onClick: () => this.setParam(entry.id, p.key, !value),
-      }, React.createElement('div', { className: 'toggle-knob' }));
-    }
-    return React.createElement('div', { key: p.key },
-      React.createElement('div', { style: labelStyle },
-        React.createElement('span', null, p.label),
-        p.type !== 'toggle' && p.type !== 'color' &&
-          React.createElement('span', { style: valueStyle }, this.formatParam(entry, p.key, value), p.unit ? ' ' + p.unit : '')
-      ),
-      control
-    );
-  }
-
-  dartFinalCode(entry, vals) {
-    return entry.codeTemplate.replace(/\{\{(\w+)\}\}/g, (_, k) => this.formatParam(entry, k, vals[k]));
-  }
-
-  render() {
-    return this.renderVals().app;
-  }
-
-  // ---------- Root ----------
-  renderVals() {
-    // Define preview helper components — declared here so they capture React/fm via closure
-    const fm = this.fm;
-    if (typeof window !== 'undefined' && fm && !window.__previewHelpersInstalled) {
-      window.__previewHelpersInstalled = true;
-    }
-
-    const app = React.createElement('div', { style: { minHeight: '100vh', background: '#0d1117', color: '#e6edf3' } },
-      // Top nav
-      React.createElement('header', { style: {
-        position: 'sticky', top: 0, zIndex: 20,
-        backdropFilter: 'blur(8px)', background: 'rgba(13,17,23,0.85)',
-        borderBottom: '1px solid #21262d',
-        padding: '12px 32px', display: 'flex', alignItems: 'center', gap: 16
-      } },
-        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }, onClick: () => this.setState({ view: 'gallery' }) },
-          React.createElement('div', { style: {
-            width: 26, height: 26, borderRadius: 7,
-            background: 'conic-gradient(from 230deg at 50% 50%, #4dd0e1, #3fb950, #d29922, #4dd0e1)',
-            boxShadow: '0 0 0 1px #21262d inset'
-          } }),
-          React.createElement('div', { style: { display: 'flex', flexDirection: 'column', lineHeight: 1 } },
-            React.createElement('span', { style: { fontSize: 13, fontWeight: 600 } }, 'Flutter Motion Kit'),
-            React.createElement('span', { className: 'mono', style: { fontSize: 10, color: '#6e7681', marginTop: 2 } }, 'v3.32.0')
-          )
-        ),
-        React.createElement('nav', { style: { display: 'flex', gap: 18, marginLeft: 24, fontSize: 13, color: '#8b949e' } },
-          [['Gallery', '/gallery'], ['Docs', '/docs'], ['Verifier', '/verifier'], ['Changelog', '/changelog']].map(([n, href], i) =>
-            React.createElement('a', { key: n, href, onClick: (e) => { if (href === '#') e.preventDefault(); },
-              style: { color: i === 0 ? '#e6edf3' : '#8b949e', textDecoration: 'none' } }, n)
-          )
-        ),
-        React.createElement('div', { style: { marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' } },
-          React.createElement('span', { className: 'mono', style: { fontSize: 11, color: '#6e7681' } }, '⌘K'),
-          React.createElement('button', {
-            style: { background: '#161b22', border: '1px solid #30363d', color: '#e6edf3', padding: '6px 12px', borderRadius: 6, fontSize: 12, cursor: 'pointer' }
-          }, 'Sign in')
-        )
-      ),
-      this.state.view === 'gallery' ? this.renderGallery() : this.renderDetail(),
-      // Toast
-      this.state.copyToast && React.createElement('div', {
-        className: 'toast mono',
-        style: {
-          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-          background: '#161b22', border: '1px solid #4dd0e1', color: '#4dd0e1',
-          padding: '8px 14px', borderRadius: 8, fontSize: 12, zIndex: 50,
-          boxShadow: '0 12px 40px -10px rgba(77,208,225,0.35)'
-        }
-      }, '✓ ', this.state.copyToast)
-    );
-    return { app };
-  }
+  out += esc(src.slice(last));
+  return out;
 }
 
-// ---------- Sub-components for specific previews ----------
-function HeroDemo({ fm, vals, replay, mini }) {
-  const { motion } = fm;
-  const [expanded, setExpanded] = React.useState(false);
-  // Auto-toggle on each replay tick so the Hero keeps expanding/collapsing on its own
-  React.useEffect(() => { setExpanded(replay % 2 === 1); }, [replay]);
-  const m = mini ? 0.5 : 1;
-  const startW = vals.startW * m;
-  const startH = vals.startH * m;
-  const dur = vals.duration / 1000;
-  return React.createElement('div', {
-    onClick: () => setExpanded(v => !v),
-    style: { cursor: 'pointer', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }
-  },
-    React.createElement(motion.div, {
-      layout: true,
-      transition: { duration: dur, ease: [0.45, 0, 0.15, 1] },
-      animate: {
-        width: expanded ? (mini ? 200 : 360) : startW,
-        height: expanded ? (mini ? 110 : 240) : startH,
-        borderRadius: vals.radius,
-      },
-      style: {
-        background: vals.color,
-        boxShadow: '0 10px 36px -12px rgba(77,208,225,0.45)',
-        display: 'flex', alignItems: 'flex-end', padding: 10,
-      }
-    },
-      !mini && React.createElement('span', { style: { fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'rgba(13,17,23,0.7)' } }, expanded ? 'tap to collapse' : 'tap to expand')
-    )
-  );
+function aiPrompt(e){
+  const pf = e.pitfalls.map((p,i)=>`${i+1}. ${p.claim} — ${p.fix}`).join('\n');
+  return `I want exactly this Flutter animation effect: ${e.title} (${e.category}).\n\n`
+    + `Implement it in my project using the reference below, and you MUST follow every pitfall.\n`
+    + `For the verified, lint-passing implementation prefer the flutter-motion MCP `
+    + `(search_flutter_animation for a "${e.category}" animation, then get_animation), or see https://motion.markxian.cn/gallery .\n\n`
+    + '```dart\n' + e.code.trim() + '\n```\n\nPitfalls (do not violate):\n' + pf + `\n\n(verified ${e.verifiedOn})`;
 }
 
-function StaggerDemo({ fm, vals, replay, mini }) {
-  const { motion } = fm;
-  const m = mini ? 0.7 : 1;
-  const count = Math.round(vals.count);
-  const totalDur = vals.duration / 1000;
-  const stagger = vals.stagger;
-  const items = [];
-  for (let i = 0; i < count; i++) items.push(i);
-  const slideY = vals.direction === 'slide-down' ? -vals.slide * 40 : vals.direction === 'fade-only' ? 0 : vals.slide * 40;
+function renderHome(){
+  const q = Q.trim().toLowerCase();
+  const list = CATALOG.filter(e => (FILTER==='all'||e.category===FILTER)
+    && (!q || e.title.toLowerCase().includes(q) || e.summary.toLowerCase().includes(q) || (e.tags||[]).some(t=>t.includes(q))));
+  const totalPitfalls = CATALOG.reduce((a,e)=>a+e.pitfalls.length,0);
+  app.innerHTML = `
+    <section class="hero-bg" style="padding:64px 0 40px; border-bottom:1px solid var(--border2)">
+      <div class="wrap">
+        <div class="mono" style="color:var(--accent); font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-bottom:14px">// flutter_motion_kit</div>
+        <h1 class="hl">Flutter animations you can <span style="color:var(--accent)">preview</span>, <span style="color:var(--good)">copy</span>, and <span style="color:var(--warn)">trust</span>.</h1>
+        <p style="font-size:16px; color:var(--muted); max-width:680px; margin-top:16px; line-height:1.5">Every entry runs live in your browser as real Flutter web — not a recording — ships copy-paste code, and carries sourced pitfalls. Reuse them straight from Claude Code / Cursor via MCP.</p>
+        <div style="display:flex; gap:10px; margin-top:26px; flex-wrap:wrap; align-items:center">
+          <a class="act primary" id="add-cursor">＋ Add to Cursor</a>
+          <a class="act" id="add-vscode">＋ Add to VS Code</a>
+          <button class="act" id="add-cc"><span class="mono">$</span> Copy Claude Code command</button>
+          <div id="devs" class="mono" style="display:none; align-items:center; gap:8px; font-size:12px; color:var(--muted); padding:7px 12px; background:var(--bg); border:1px solid var(--border2); border-radius:999px">
+            <span class="live-dot" style="width:7px; height:7px; border-radius:50%; background:var(--good); box-shadow:0 0 8px var(--good)"></span><span id="devs-text"></span>
+          </div>
+        </div>
+        <div class="mono" style="display:flex; gap:28px; margin-top:32px; font-size:12px; color:var(--muted2)">
+          <div><span style="color:var(--text)">${CATALOG.length}</span> verified entries</div>
+          <div><span style="color:var(--text)">${totalPitfalls}</span> sourced pitfalls</div>
+          <div>verified <span style="color:var(--text)">Flutter 3.32 / 2026-06</span></div>
+        </div>
+      </div>
+    </section>
+    <section style="padding:24px 0 8px"><div class="wrap" style="display:flex; gap:16px; align-items:center; flex-wrap:wrap">
+      <input id="search" placeholder="Search animations, tags…" value="${esc(Q)}" style="background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-size:13px; color:var(--text); width:260px">
+      <div style="display:flex; gap:6px; flex-wrap:wrap">
+        <span class="chip" data-cat="all" aria-pressed="${FILTER==='all'}">all</span>
+        ${CATS.map(c=>`<span class="chip mono" data-cat="${c}" aria-pressed="${FILTER===c}">${c}</span>`).join('')}
+      </div>
+      <div style="margin-left:auto; font-size:12px; color:var(--muted2)">${list.length} of ${CATALOG.length}</div>
+    </div></section>
+    <section style="padding:20px 0 80px"><div class="wrap" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:18px">
+      ${list.map(e=>`
+        <a class="card" href="#/a/${e.id}">
+          <div class="accent" style="background:${CAT_COLOR[e.category]||'#8b949e'}"></div>
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px">
+            <h3 style="font-size:15px; font-weight:600; margin:0">${esc(e.title)}</h3>
+            <span class="mono" style="font-size:10px; color:var(--muted2); flex-shrink:0">${'●'.repeat(e.difficulty)}<span style="color:var(--border)">${'●'.repeat(5-e.difficulty)}</span></span>
+          </div>
+          <p style="font-size:12.5px; color:var(--muted); margin:0; line-height:1.45; flex:1">${esc(e.summary.trim())}</p>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center">
+            <span class="badge mono" style="color:${CAT_COLOR[e.category]||'#8b949e'}">${e.category}</span>
+            <span class="badge">⚠ ${e.pitfalls.length}</span>
+            <span class="mono" style="margin-left:auto; font-size:11px; color:var(--accent)">▶ live preview</span>
+          </div>
+        </a>`).join('')}
+    </div></section>`;
 
-  return React.createElement('div', {
-    key: replay,
-    style: { display: 'flex', flexDirection: 'column', gap: 6 * m, width: 200 * m }
-  },
-    items.map(i => {
-      const delay = (i / count) * stagger * totalDur;
-      return React.createElement(motion.div, {
-        key: i,
-        initial: { opacity: 0, y: slideY },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.3 * totalDur, delay, ease: [0.33, 1, 0.68, 1] },
-        style: {
-          height: 14 * m, borderRadius: 4,
-          background: `linear-gradient(90deg, #21262d 0%, #21262d ${30 + (i*7) % 50}%, transparent ${30 + (i*7) % 50}%)`,
-          border: '1px solid #30363d',
-        }
-      });
-    })
-  );
+  // wire install buttons
+  const cfg = JSON.stringify({ url: MCP });
+  document.getElementById('add-cursor').href = 'cursor://anysphere.cursor-deeplink/mcp/install?name=flutter-motion&config=' + btoa(cfg);
+  document.getElementById('add-vscode').href = 'https://insiders.vscode.dev/redirect/mcp/install?name=flutter-motion&config=' + encodeURIComponent(cfg);
+  document.getElementById('add-cc').onclick = () => copy('claude mcp add --transport http flutter-motion ' + MCP, 'Claude Code command copied');
+  // filters
+  app.querySelectorAll('.chip').forEach(c => c.onclick = () => { FILTER = c.dataset.cat; renderHome(); });
+  const s = document.getElementById('search');
+  s.oninput = () => { Q = s.value; const pos = s.selectionStart; renderHome(); const ns = document.getElementById('search'); ns.focus(); ns.setSelectionRange(pos,pos); };
+  loadDevs();
 }
 
-function PulseDemo({ fm, vals, replay, mini }) {
-  const { motion } = fm;
-  const m = mini ? 0.6 : 1;
-  const maxR = vals.maxRadius * m;
-  const speed = vals.speed / 1000;
-  const rings = Math.round(vals.rings);
-  const stroke = vals.stroke;
-  const opacity = vals.opacity;
-  return React.createElement('div', {
-    key: replay,
-    style: { position: 'relative', width: maxR * 2.2, height: maxR * 2.2, display: 'flex', alignItems: 'center', justifyContent: 'center' }
-  },
-    [...Array(rings)].map((_, i) => React.createElement(motion.div, {
-      key: i,
-      initial: { scale: 0, opacity: opacity },
-      animate: { scale: 1, opacity: 0 },
-      transition: { duration: speed, repeat: Infinity, delay: (speed * i) / rings, ease: 'easeOut' },
-      style: {
-        position: 'absolute',
-        width: maxR * 2, height: maxR * 2,
-        borderRadius: '50%',
-        border: `${stroke}px solid ${vals.color}`,
-      }
-    })),
-    React.createElement('div', { style: {
-      width: 18 * m, height: 18 * m, borderRadius: '50%',
-      background: vals.color, boxShadow: `0 0 24px ${vals.color}`
-    } })
-  );
+function renderDetail(id){
+  const e = CATALOG.find(x => x.id === id);
+  if(!e){ location.hash = '#/'; return; }
+  const meta = CAT_COLOR[e.category] || '#8b949e';
+  app.innerHTML = `
+    <section style="padding:24px 0; border-bottom:1px solid var(--border2)"><div class="wrap">
+      <a href="#/" class="mono" style="font-size:12px; color:var(--muted); text-decoration:none">← all animations</a>
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-top:12px">
+        <div>
+          <div class="mono" style="font-size:11px; color:${meta}; text-transform:uppercase; letter-spacing:1px">${e.category} · difficulty ${e.difficulty}/5 · verified ${esc(e.verifiedOn)}</div>
+          <h1 style="font-size:28px; font-weight:700; margin:8px 0 0; letter-spacing:-0.5px">${esc(e.title)}</h1>
+          <p style="font-size:14px; color:var(--muted); margin:6px 0 0; max-width:620px; line-height:1.5">${esc(e.summary.trim())}</p>
+        </div>
+        <button class="act primary" id="copy-ai" style="flex-shrink:0">📋 Copy for AI (code + pitfalls)</button>
+      </div>
+    </div></section>
+    <section style="padding:24px 0"><div class="wrap">
+      <div style="display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:18px; align-items:start">
+        <div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px">
+            <span class="mono" style="font-size:11px; color:var(--good)">▶︎ real running Flutter (${esc(e.verifiedOn.split('/')[0].trim())} · self-hosted)</span>
+            <button class="act" id="replay" style="padding:4px 10px; font-size:11px; font-weight:500">↻ Replay</button>
+          </div>
+          <iframe class="preview" id="preview" src="/preview/${e.id}/" title="${esc(e.title)} preview" loading="lazy"></iframe>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin:18px 0 8px">
+            <span class="mono" style="font-size:11px; color:var(--muted)">${e.id}.dart</span>
+            <button class="act" id="copy-code" style="padding:4px 10px; font-size:11px; font-weight:500">Copy code</button>
+          </div>
+          <pre class="code mono"><code id="code"></code></pre>
+        </div>
+        <div>
+          <h3 style="font-size:14px; font-weight:600; margin:0 0 8px">⚠️ Pitfalls (${e.pitfalls.length})</h3>
+          ${e.pitfalls.map(p=>`
+            <div class="pitfall">
+              <div style="font-size:13px">${esc(p.claim)}</div>
+              <div class="fix">✅ ${esc(p.fix)}</div>
+              <div class="src"><span class="conf mono">${esc(p.confidence)}</span>${p.source && p.source.startsWith('http') ? ` · <a href="${esc(p.source)}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none">source</a>` : ''}${p.provenBy ? ` · <span class="mono">proven by ${esc(p.provenBy)}</span>` : ''}</div>
+            </div>`).join('')}
+          ${(e.docs&&e.docs.length)?`<h3 style="font-size:14px; font-weight:600; margin:18px 0 8px">Official docs</h3><ul style="padding-left:18px; font-size:12.5px; line-height:1.7">${e.docs.map(d=>`<li><a href="${esc(d)}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none; word-break:break-all">${esc(d)}</a></li>`).join('')}</ul>`:''}
+        </div>
+      </div>
+    </div></section>`;
+  document.getElementById('code').innerHTML = tintDart(e.code.trim());
+  const pv = document.getElementById('preview');
+  document.getElementById('replay').onclick = () => { pv.src = pv.src; };
+  document.getElementById('copy-code').onclick = () => copy(e.code, 'Code copied');
+  document.getElementById('copy-ai').onclick = () => copy(aiPrompt(e), 'Copied — paste into your AI assistant');
+  window.scrollTo(0,0);
 }
 
+function loadDevs(){
+  fetch('https://mcp.markxian.cn/stats').then(r=>r.json()).then(d=>{
+    if(typeof d.connections==='number'){ const t=document.getElementById('devs-text'), b=document.getElementById('devs'); if(t&&b){ t.textContent = d.connections.toLocaleString()+' developers connected'; b.style.display='inline-flex'; } }
+  }).catch(()=>{});
+}
 
-ReactDOMClient.createRoot(document.getElementById('root')).render(React.createElement(Component));
+function route(){ const m = location.hash.match(/^#\/a\/(.+)$/); if(m) renderDetail(decodeURIComponent(m[1])); else renderHome(); }
+window.addEventListener('hashchange', route);
+
+fetch('/api/animations.json').then(r=>r.json()).then(d=>{ CATALOG = d.entries; CATS = d.categories; route(); })
+  .catch(()=>{ app.innerHTML = '<div class="wrap" style="padding:80px 32px; color:var(--warn)">Failed to load catalog.</div>'; });
 </script>
+
 </body>
 </html>
